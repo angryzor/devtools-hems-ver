@@ -298,14 +298,22 @@ void LevelEditor::SpawnObject() {
 	auto* resource = placeTargetLayer->GetResource();
 	auto* alloc = resource->GetAllocator();
 
+#ifdef DEVTOOLS_TARGET_SDK_wars
 	// FIXME: We're leaking memory here because the string does not get freed.
 	auto name = new char[100];
-	snprintf(name, sizeof(name), "%s_%zd", objectClassToPlace->name, resource->GetObjects().size());
+#else
+	char name[100];
+#endif
+	snprintf(name, 100, "%s_%zd", objectClassToPlace->name, resource->GetObjects().size());
 
 	auto* objData = new (alloc) ObjectData{
 		alloc,
 		objectClassToPlace,
+#ifdef DEVTOOLS_TARGET_SDK_wars
 		{ mt() },
+#else
+		{ mt(), mt() },
+#endif
 		name,
 		focusedObjects.size() == 1 ? focusedObjects[0] : nullptr,
 		{ csl::math::Position{ *Desktop::instance->GetPickedLocation() }, csl::math::Position{ 0, 0, 0 } }

@@ -3,6 +3,7 @@
 #include <ui/resources/editors/ResObjectWorldEditor.h>
 #include <ui/common/inputs/Basic.h>
 #include <ui/common/editors/Basic.h>
+#include <ui/common/viewers/Basic.h>
 #include <ui/common/editors/ObjectData.h>
 
 using namespace hh::game;
@@ -37,7 +38,7 @@ void RenderGameServiceInspector(hh::game::ObjectWorld& objWorld) {
 					if (ImGui::TreeNode(&status, status.objectData->name)) {
 						CheckboxFlags("Enabled", status.flags, WorldObjectStatus::Flag::ENABLED);
 						CheckboxFlags("Is alive", status.flags, WorldObjectStatus::Flag::IS_ALIVE);
-						CheckboxFlags("Started", status.flags, WorldObjectStatus::Flag::STARTED);
+						CheckboxFlags("Shutdown", status.flags, WorldObjectStatus::Flag::SHUTDOWN);
 						CheckboxFlags("No restart", status.flags, WorldObjectStatus::Flag::NO_RESTART);
 
 #ifndef DEVTOOLS_TARGET_SDK_wars
@@ -52,6 +53,9 @@ void RenderGameServiceInspector(hh::game::ObjectWorld& objWorld) {
 				}
 			}
 			ImGui::TreePop();
+
+			if (objWorld.packFile)
+				Viewer("Packfile", objWorld.packFile->GetName());
 		}
 	}
 }

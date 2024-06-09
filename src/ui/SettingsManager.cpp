@@ -238,7 +238,7 @@ void SettingsManager::ApplySettings() {
 		for (size_t j = 0; j < 32; j++)
 			GOCVisualDebugDrawRenderer::colliderFilters[i][j] = settings.debugRenderingColliderFilters[i][j];
 
-	ReloadInputSettings();
+	//ReloadInputSettings();
 }
 
 void SettingsManager::ClearAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handler)

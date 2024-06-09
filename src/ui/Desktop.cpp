@@ -2,6 +2,7 @@
 #include "Desktop.h"
 #include "ToolBar.h"
 #include "SettingsManager.h"
+#include "resources/ResourceBrowser.h"
 #include "operation-modes/ObjectInspection/ObjectInspection.h"
 #include "operation-modes/LevelEditor/LevelEditor.h"
 #ifdef DEVTOOLS_TARGET_SDK_rangers
@@ -11,6 +12,7 @@
 #include <utilities/math/MathUtils.h>
 #include <utilities/CompatibleObject.h>
 #include "common/editors/Basic.h"
+#include <TheSurprise.h>
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -40,7 +42,7 @@ void Desktop::Render() {
 
 	ToolBar::Render();
 	operationMode->Render();
-	//ResourceBrowser::RenderDialogs();
+	ResourceBrowser::RenderDialogs();
 
 	csl::ut::MoveArray<StandaloneWindow*> windowsThatWantToClose{ hh::fnd::MemoryRouter::GetTempAllocator() };
 
@@ -77,6 +79,71 @@ void Desktop::Render() {
 	//	ImGui::Text("%d", *reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
 	//	ImGui::Checkbox("grind", reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
 	//}
+	static ObjFireworksSpectacle* spectacle{};
+	if (auto* gameManager = GameManager::GetInstance()) {
+		if (ImGui::Button("Generate timings RFL")) {
+			ReflectionSerializer::SerializeToFile(L"surprising_timings.rfl", &fireworkDescs, FireworkSpectacleDesc::rflClass);
+		}
+		if (ImGui::Button("Load Surprise Service")) {
+			auto* s = gameManager->CreateService<SurpriseService>(hh::fnd::MemoryRouter::GetModuleAllocator());
+			gameManager->RegisterService(s);
+
+			BuiltinTypeRegistry::GetTypeInfoRegistry()->Register(&ObjFireworkLauncherSpawner::typeInfo);
+			BuiltinTypeRegistry::GetClassNameRegistry()->Register(&ObjFireworkLauncherSpawner::rflClass);
+			BuiltinTypeRegistry::GetTypeInfoRegistry()->Register(&ObjHEMSMemberSpawner::typeInfo);
+			BuiltinTypeRegistry::GetClassNameRegistry()->Register(&ObjHEMSMemberSpawner::rflClass);
+			BuiltinTypeRegistry::GetTypeInfoRegistry()->Register(&FireworkDesc::typeInfo);
+			BuiltinTypeRegistry::GetClassNameRegistry()->Register(&FireworkDesc::rflClass);
+			BuiltinTypeRegistry::GetTypeInfoRegistry()->Register(&FireworkControlDesc::typeInfo);
+			BuiltinTypeRegistry::GetClassNameRegistry()->Register(&FireworkControlDesc::rflClass);
+			BuiltinTypeRegistry::GetTypeInfoRegistry()->Register(&FireworkSpectacleDesc::typeInfo);
+			BuiltinTypeRegistry::GetClassNameRegistry()->Register(&FireworkSpectacleDesc::rflClass);
+
+			const hh::game::GameObjectClass* goClass = ObjFireworkLauncher::GetClass();
+			GameObjectSystem::GetInstance()->gameObjectRegistry->AddObject(&goClass);
+			goClass = ObjHEMSMember::GetClass();
+			GameObjectSystem::GetInstance()->gameObjectRegistry->AddObject(&goClass);
+
+			resourceLoader->LoadPackfile("stage/w2_common", 0);
+			resourceLoader->LoadPackfile("mods/angryzor_devtools/pou", 0);
+
+			ResourceLoader::Unk1 locale{};
+
+			resourceLoader->LoadResource(InplaceTempUri{ "sound/the_end01_sound/bgm_lastboss" }, hh::snd::ResAtomCueSheet::GetTypeInfo(), 0, 1, locale);
+			resourceLoader->LoadResource(InplaceTempUri{ "mods/angryzor_devtools/surprising_timings" }, hh::fnd::ResReflection::GetTypeInfo(), 0, 1, locale);
+			resourceLoader->LoadResource(InplaceTempUri{ "mods/angryzor_devtools/surprising_objects.gedit" }, hh::game::ResObjectWorld::GetTypeInfo(), 0, 1, locale);
+			resourceLoader->LoadResource(InplaceTempUri{ "mods/angryzor_devtools/surprising_pous.gedit" }, hh::game::ResObjectWorld::GetTypeInfo(), 0, 1, locale);
+		}
+		if (ImGui::Button("Load objects")) {
+			auto* resource = ResourceManager::GetInstance()->GetResource<ResObjectWorld>("surprising_objects");
+			auto* layer = ObjectWorldChunkLayer::Create(hh::fnd::MemoryRouter::GetModuleAllocator(), resource);
+			gameManager->GetService<ObjectWorld>()->GetWorldChunks()[0]->AddLayer(layer);
+			gameManager->GetService<ObjectWorld>()->GetWorldChunks()[0]->SetLayerEnabled("surprising_objects", true);
+
+			resource = ResourceManager::GetInstance()->GetResource<ResObjectWorld>("surprising_pous");
+			layer = ObjectWorldChunkLayer::Create(hh::fnd::MemoryRouter::GetModuleAllocator(), resource);
+			gameManager->GetService<ObjectWorld>()->GetWorldChunks()[0]->AddLayer(layer);
+			gameManager->GetService<ObjectWorld>()->GetWorldChunks()[0]->SetLayerEnabled("surprising_pous", true);
+		}
+		if (spectacle) {
+			ImGui::Text("At index %zd, runTime %f", spectacle->index, spectacle->runTime);
+			if (ImGui::Button("End fireworks spectacle")) {
+				spectacle->Kill();
+				spectacle = nullptr;
+			}
+		} else {
+			if (ImGui::Button("Start fireworks spectacle")) {
+				spectacle = static_cast<ObjFireworksSpectacle*>(ObjFireworksSpectacle::GetClass()->instantiator(hh::fnd::MemoryRouter::GetModuleAllocator()));
+				gameManager->AddGameObject(spectacle, "Fireworks spectacle", false, nullptr, nullptr);
+			}
+		}
+	}
+
+	//static char packfileName[300];
+	//ImGui::InputText("Packfile", packfileName, sizeof(packfileName));
+	//if (ImGui::Button("Put packfile in objectworld lol"))
+	//	if (auto* objectWorld = GameManager::GetInstance()->GetService<hh::game::ObjectWorld>())
+	//		objectWorld->packFile = ResourceManager::GetInstance()->GetResource<hh::fnd::Packfile>(packfileName);
 
 	//if (ImGui::Button("Add island objinfo")) {
 

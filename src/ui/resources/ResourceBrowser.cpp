@@ -264,9 +264,15 @@ void ResourceBrowser::RenderPreview(const hh::fnd::ManagedResource* resource, fl
 	
 	if (&resource->GetClass() == hh::gfnd::ResTexture::GetTypeInfo()) {
 		auto* texture = static_cast<const hh::gfnd::ResTexture*>(resource);
-		ImGui::Image(GetTextureIDFromResTexture(texture), ImVec2(size, size));
-		ImGui::SetCursorPos(cursor + ImVec2(0, size - 32));
-		RenderIcon(assetIcons, ResourceTypeToAssetIconId(&resource->GetClass()), ImVec2(32, 32));
+		if (auto* textureId = GetTextureIDFromResTexture(texture)) {
+			ImGui::Image(textureId, ImVec2(size, size));
+			ImGui::SetCursorPos(cursor + ImVec2(0, size - 32));
+			RenderIcon(assetIcons, ResourceTypeToAssetIconId(&resource->GetClass()), ImVec2(32, 32));
+		}
+		else {
+			ImGui::SetCursorPos(cursor + ImVec2((size - 64) / 2, (size - 64) / 2));
+			RenderIcon(assetIcons, ResourceTypeToAssetIconId(&resource->GetClass()));
+		}
 	}
 	else {
 		ImGui::SetCursorPos(cursor + ImVec2((size - 64) / 2, (size - 64) / 2));

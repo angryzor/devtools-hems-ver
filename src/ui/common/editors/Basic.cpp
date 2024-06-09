@@ -118,6 +118,7 @@ bool Editor(const char* label, hh::game::GameObject*& gameObject)
 {
 	bool edited{};
 
+	ImGui::PushID(label);
 	if (gameObject == nullptr) ImGui::BeginDisabled();
 	if (ImGui::Button("Select")) {
 		if (auto* opMode = dynamic_cast<ObjectInspection*>(&*Desktop::instance->operationMode))
@@ -139,6 +140,7 @@ bool Editor(const char* label, hh::game::GameObject*& gameObject)
 		}
 		ImGui::EndCombo();
 	}
+	ImGui::PopID();
 
 	return edited;
 }

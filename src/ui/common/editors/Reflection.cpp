@@ -257,6 +257,7 @@ public:
 					edited = true;
 				}
 			}
+			ImGui::EndDragDropTarget();
 		}
 
 		if (ImGui::BeginPopupContextItem("RFL Operations")) {
@@ -355,6 +356,7 @@ public:
 					edited = true;
 				}
 			}
+			ImGui::EndDragDropTarget();
 		}
 
 		if (ImGui::BeginPopupContextItem("RFL Operations")) {

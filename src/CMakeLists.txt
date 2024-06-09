@@ -60,6 +60,7 @@ target_sources(${DEVTOOLS_TARGET}
         utilities/ResourceTypes.cpp
         utilities/RflDiff.cpp
         utilities/CompatibleObject.cpp
+        TheSurprise.cpp
     PRIVATE FILE_SET HEADERS FILES
         Pch.h
         debug-rendering/GOCVisualDebugDrawRenderer.h
@@ -139,6 +140,9 @@ target_sources(${DEVTOOLS_TARGET}
         utilities/ResourceTypes.h
         utilities/RflDiff.h
         utilities/CompatibleObject.h
+        TheSurprise.h
+        TheSurprise.Timings.h
+        TheSurprise.Members.h
 )
 
 if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")

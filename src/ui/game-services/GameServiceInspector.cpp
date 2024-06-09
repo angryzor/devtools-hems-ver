@@ -26,6 +26,17 @@ typedef std::tuple<
 #include "game-service-inspectors/GameModeResourceManager.h"
 #include "game-service-inspectors/TerrainManager.h"
 
+#include <TheSurprise.h>
+#include <ui/common/inputs/Basic.h>
+#include <ui/common/editors/Basic.h>
+
+const char* surpriseModeNames[] = { "COLLECTED_RANDOM", "COLLECTED", "ALL_RANDOM", "ALL", "DDAY" };
+void RenderGameServiceInspector(SurpriseService& service) {
+	ComboEnum("Mode", service.mode, surpriseModeNames);
+	Editor("Random threshold", service.randomThreshold);
+	Editor("Signal listeners", service.signalListeners);
+}
+
 typedef std::tuple<
 	app::gfx::FxParamManager,
 	hh::game::ObjectWorld,
@@ -34,7 +45,8 @@ typedef std::tuple<
 	hh::game::CameraManager,
 	app::camera::CameraService,
 	app::game::GameModeResourceManager,
-	app::trr::TerrainManager
+	app::trr::TerrainManager,
+	SurpriseService
 > InspectableServices;
 
 #endif
@@ -45,7 +57,9 @@ bool RenderServiceInspector(hh::game::GameService& service) {
 	bool result{ service.pStaticClass == T::GetClass() };
 	
 	if (result) {
+		ImGui::PushID(&service);
 		RenderGameServiceInspector(static_cast<T&>(service));
+		ImGui::PopID();
 	}
 
 	return result;

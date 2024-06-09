@@ -124,100 +124,103 @@ void ObjectInspector::Render() {
 					// }
 					ImGui::EndTabItem();
 				}
-				//if (ImGui::BeginTabItem("Update configuration")) {
-				//	if (ImGui::BeginChild("Content")) {
-				//		ImGui::Text("GameObject requested update phases:");
-				//		ImGui::BeginGroup();
-				//		CheckboxFlags("PreAnim", focusedObject->forcedUpdateFlags, UpdatingPhase::PRE_ANIM);
-				//		if (ImGui::IsItemEdited())
-				//			focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::PRE_ANIM);
-				//		ImGui::SameLine();
-				//		CheckboxFlags("PostAnim", focusedObject->forcedUpdateFlags, UpdatingPhase::POST_ANIM);
-				//		if (ImGui::IsItemEdited())
-				//			focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::POST_ANIM);
-				//		ImGui::SameLine();
-				//		CheckboxFlags("Final", focusedObject->forcedUpdateFlags, UpdatingPhase::FINAL);
-				//		if (ImGui::IsItemEdited())
-				//			focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::FINAL);
-				//		ImGui::EndGroup();
-				//		ImGui::Text("Real update phases due to components:");
-				//		ImGui::BeginDisabled();
-				//		CheckboxFlags("PreAnim", focusedObject->updateFlags, UpdatingPhase::PRE_ANIM);
-				//		ImGui::SameLine();
-				//		CheckboxFlags("PostAnim", focusedObject->updateFlags, UpdatingPhase::POST_ANIM);
-				//		ImGui::SameLine();
-				//		CheckboxFlags("Final", focusedObject->updateFlags, UpdatingPhase::FINAL);
-				//		ImGui::EndDisabled();
-				//		ImGui::SeparatorText("Component update configuration");
-				//		for (auto* component : focusedObject->components) {
-				//			ImGui::PushID(component);
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+				if (ImGui::BeginTabItem("Update configuration")) {
+					if (ImGui::BeginChild("Content")) {
+						ImGui::Text("GameObject requested update phases:");
+						ImGui::BeginGroup();
+						CheckboxFlags("PreAnim", focusedObject->forcedUpdateFlags, UpdatingPhase::PRE_ANIM);
+						if (ImGui::IsItemEdited())
+							focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::PRE_ANIM);
+						ImGui::SameLine();
+						CheckboxFlags("PostAnim", focusedObject->forcedUpdateFlags, UpdatingPhase::POST_ANIM);
+						if (ImGui::IsItemEdited())
+							focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::POST_ANIM);
+						ImGui::SameLine();
+						CheckboxFlags("Final", focusedObject->forcedUpdateFlags, UpdatingPhase::FINAL);
+						if (ImGui::IsItemEdited())
+							focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::FINAL);
+						ImGui::EndGroup();
+						ImGui::Text("Real update phases due to components:");
+						ImGui::BeginDisabled();
+						CheckboxFlags("PreAnim", focusedObject->updateFlags, UpdatingPhase::PRE_ANIM);
+						ImGui::SameLine();
+						CheckboxFlags("PostAnim", focusedObject->updateFlags, UpdatingPhase::POST_ANIM);
+						ImGui::SameLine();
+						CheckboxFlags("Final", focusedObject->updateFlags, UpdatingPhase::FINAL);
+						ImGui::EndDisabled();
+						ImGui::SeparatorText("Component update configuration");
+						for (auto* component : focusedObject->components) {
+							ImGui::PushID(component);
 
-				//			char title[200];
-				//			snprintf(title, 200, "%s (%s)", component->pStaticClass->pName, component->pStaticClass->category);
+							char title[200];
+							snprintf(title, 200, "%s (%s)", component->pStaticClass->pName, component->pStaticClass->category);
 
-				//			if (ImGui::CollapsingHeader(title)) {
-				//				ImGui::Text("Update phases");
-				//				//ImGui::BeginDisabled();
-				//				ImGui::BeginGroup();
-				//				CheckboxFlags("PreAnim", component->updateFlags, UpdatingPhase::PRE_ANIM);
-				//				if (ImGui::IsItemDeactivatedAfterEdit()) {
-				//					if (component->updateFlags.test(UpdatingPhase::PRE_ANIM)) {
-				//						auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].find(component);
-				//						if (it == -1)
-				//							focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].push_back(component);
-				//					}
-				//					else {
-				//						auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].find(component);
-				//						if (it != -1)
-				//							focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].remove(it);
-				//					}
-				//					focusedObject->UNSAFE_SetComponentLengths(UpdatingPhase::PRE_ANIM);
-				//					focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::PRE_ANIM);
-				//				}
-				//				ImGui::SameLine();
-				//				CheckboxFlags("PostAnim", component->updateFlags, UpdatingPhase::POST_ANIM);
-				//				if (ImGui::IsItemDeactivatedAfterEdit()) {
-				//					if (component->updateFlags.test(UpdatingPhase::POST_ANIM)) {
-				//						auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].find(component);
-				//						if (it == -1)
-				//							focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].push_back(component);
-				//					}
-				//					else {
-				//						auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].find(component);
-				//						if (it != -1)
-				//							focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].remove(it);
-				//					}
-				//					focusedObject->UNSAFE_SetComponentLengths(UpdatingPhase::POST_ANIM);
-				//					focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::POST_ANIM);
-				//				}
-				//				ImGui::SameLine();
-				//				CheckboxFlags("Final", component->updateFlags, UpdatingPhase::FINAL);
-				//				if (ImGui::IsItemDeactivatedAfterEdit()) {
-				//					if (component->updateFlags.test(UpdatingPhase::FINAL)) {
-				//						auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].find(component);
-				//						if (it == -1)
-				//							focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].push_back(component);
-				//					}
-				//					else {
-				//						auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].find(component);
-				//						if (it != -1)
-				//							focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].remove(it);
-				//					}
-				//					focusedObject->UNSAFE_SetComponentLengths(UpdatingPhase::FINAL);
-				//					focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::FINAL);
-				//				}
-				//				ImGui::EndGroup();
-				//				//ImGui::EndDisabled();
-				//				ImGui::Text("Update priorities:");
-				//				ImGui::InputScalarN("PreAnim, PostAnim, Final", ImGuiDataType_U8, component->updatePriorityByPhase, 3);
-				//			}
+							if (ImGui::CollapsingHeader(title)) {
+								ImGui::Text("Update phases");
+								//ImGui::BeginDisabled();
+								ImGui::BeginGroup();
+								CheckboxFlags("PreAnim", component->updateFlags, UpdatingPhase::PRE_ANIM);
+								if (ImGui::IsItemDeactivatedAfterEdit()) {
+									if (component->updateFlags.test(UpdatingPhase::PRE_ANIM)) {
+										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].find(component);
+										if (it == -1)
+											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].push_back(component);
+									}
+									else {
+										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].find(component);
+										if (it != -1)
+											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].remove(it);
+									}
+									focusedObject->UNSAFE_SetComponentLengths(UpdatingPhase::PRE_ANIM);
+									focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::PRE_ANIM);
+								}
+								ImGui::SameLine();
+								CheckboxFlags("PostAnim", component->updateFlags, UpdatingPhase::POST_ANIM);
+								if (ImGui::IsItemDeactivatedAfterEdit()) {
+									if (component->updateFlags.test(UpdatingPhase::POST_ANIM)) {
+										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].find(component);
+										if (it == -1)
+											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].push_back(component);
+									}
+									else {
+										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].find(component);
+										if (it != -1)
+											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].remove(it);
+									}
+									focusedObject->UNSAFE_SetComponentLengths(UpdatingPhase::POST_ANIM);
+									focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::POST_ANIM);
+								}
+								ImGui::SameLine();
+								CheckboxFlags("Final", component->updateFlags, UpdatingPhase::FINAL);
+								if (ImGui::IsItemDeactivatedAfterEdit()) {
+									if (component->updateFlags.test(UpdatingPhase::FINAL)) {
+										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].find(component);
+										if (it == -1)
+											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].push_back(component);
+									}
+									else {
+										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].find(component);
+										if (it != -1)
+											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].remove(it);
+									}
+									focusedObject->UNSAFE_SetComponentLengths(UpdatingPhase::FINAL);
+									focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::FINAL);
+								}
+								ImGui::EndGroup();
+								//ImGui::EndDisabled();
+								ImGui::Text("Update priorities:");
+								ImGui::InputScalarN("PreAnim, PostAnim, Final", ImGuiDataType_U8, component->updatePriorityByPhase, 3);
+							}
 
-				//			ImGui::PopID();
-				//		}
-				//	}
-				//	ImGui::EndChild();
-				//	ImGui::EndTabItem();
-				//}
+							ImGui::PopID();
+						}
+					}
+					ImGui::EndChild();
+					ImGui::EndTabItem();
+				}
+#endif
+
 				ImGui::EndTabBar();
 			}
 		}

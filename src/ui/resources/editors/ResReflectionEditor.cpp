@@ -64,7 +64,9 @@ void ResReflectionEditor::RenderContents() {
 
 		if (ImGui::BeginCombo("RflClass", previewValue)) {
 			for (auto* rflc : RflClassNameRegistry::GetInstance()->GetItems()) {
-				if (resource->GetSize() == rflc->GetSizeInBytes()) {
+				auto resSize = resource->GetSize();
+				auto rflSize = rflc->GetSizeInBytes();
+				if (resSize == rflSize || resSize == ((rflSize + 0xFF) & ~0xFF)) {
 					bool is_selected = rflClass == rflc;
 
 					if (ImGui::Selectable(rflc->GetName(), is_selected)) {
