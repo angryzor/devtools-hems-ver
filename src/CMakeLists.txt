@@ -60,7 +60,6 @@ target_sources(${DEVTOOLS_TARGET}
         utilities/ResourceTypes.cpp
         utilities/RflDiff.cpp
         utilities/CompatibleObject.cpp
-        TheSurprise.cpp
     PRIVATE FILE_SET HEADERS FILES
         Pch.h
         debug-rendering/GOCVisualDebugDrawRenderer.h
@@ -140,9 +139,6 @@ target_sources(${DEVTOOLS_TARGET}
         utilities/ResourceTypes.h
         utilities/RflDiff.h
         utilities/CompatibleObject.h
-        TheSurprise.h
-        TheSurprise.Timings.h
-        TheSurprise.Members.h
 )
 
 if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
@@ -152,6 +148,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/game-services/game-service-inspectors/CameraService.cpp
             ui/game-services/game-service-inspectors/GameModeResourceManager.cpp
             ui/game-services/game-service-inspectors/TerrainManager.cpp
+            ui/game-services/game-service-inspectors/SoundDirector.cpp
             ui/tools/NeedleFxSceneDataTester.cpp
             ui/tools/NeedleFxSceneDataTesterV2.cpp
             ui/common/editors/Camera.cpp
@@ -167,6 +164,8 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/operation-modes/ObjectInspection/component-inspectors/GOCEvent.cpp
             ui/operation-modes/ObjectInspection/component-inspectors/GOCCamera.cpp
             ui/operation-modes/ObjectInspection/component-inspectors/GOCAnimator.cpp
+            ui/operation-modes/ObjectInspection/component-inspectors/GOCVisual.cpp
+            ui/operation-modes/ObjectInspection/component-inspectors/GOCActivator.cpp
             ui/operation-modes/ObjectInspection/component-inspectors/GOCPlayerBlackboard.cpp
             ui/operation-modes/ObjectInspection/component-inspectors/GOCPlayerKinematicParams.cpp
             ui/operation-modes/SurfRideEditor/Timeline.cpp
@@ -176,5 +175,27 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/resources/editors/ResEffectEditor.cpp
             ui/resources/editors/ResMaterialEditor.cpp
             ui/resources/editors/ResSurfRideProjectEditor.cpp
-        )
+            the-surprise/FireworkSpectacleDesc.cpp
+            the-surprise/ObjFireworksSpectacle.cpp
+            the-surprise/ObjHEMSMember.cpp
+            the-surprise/SpectacleSignalId.cpp
+            the-surprise/spectacle-responders/ObjSpectacleEffectEmitter.cpp
+            the-surprise/spectacle-responders/ObjSpectacleObjectStatusController.cpp
+            the-surprise/SurpriseService.cpp
+            the-surprise/TheSurprise.cpp
+        PRIVATE FILE_SET HEADERS FILES
+        ui/game-services/game-service-inspectors/SoundDirector.h
+            ui/operation-modes/ObjectInspection/component-inspectors/GOCVisual.h
+            ui/operation-modes/ObjectInspection/component-inspectors/GOCActivator.h
+            the-surprise/FireworkSpectacleDesc.h
+            the-surprise/Members.h
+            the-surprise/ObjFireworksSpectacle.h
+            the-surprise/ObjHEMSMember.h
+            the-surprise/SpectacleSignalId.h
+            the-surprise/spectacle-responders/ObjSpectacleEffectEmitter.h
+            the-surprise/spectacle-responders/ObjSpectacleObjectStatusController.h
+            the-surprise/SurpriseService.h
+            the-surprise/TheSurprise.h
+            the-surprise/Timings.h
+    )
 endif()

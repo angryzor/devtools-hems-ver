@@ -77,39 +77,52 @@ bool Editor(const char* label, csl::ut::Color8& color) {
 
 bool Editor(const char* label, hh::game::ObjectId& id) {
     bool edited{};
-	//auto* objWorld = hh::game::GameManager::GetInstance()->GetService<hh::game::ObjectWorld>();
+	auto* objWorld = hh::game::GameManager::GetInstance()->GetService<hh::game::ObjectWorld>();
 
-	//if (objWorld == nullptr) {
+	if (objWorld == nullptr) {
 		Viewer(label, id);
-	//}
-	//else {
-	//	char unkNameBuf[50];
-	//	sprintf_s(unkNameBuf, 50, "<%016zx%016zx>", id.groupId, id.objectId);
+	}
+	else {
+		char unkNameBuf[50];
+		sprintf_s(unkNameBuf, 50, "<%016zx%016zx>", id.groupId, id.objectId);
 
-	//	const char* name = unkNameBuf;
+		const char* name = unkNameBuf;
 
-	//	for (auto* chunk : objWorld->GetWorldChunks()) {
-	//		int idx = chunk->GetObjectIndexById(id);
+		for (auto* chunk : objWorld->GetWorldChunks()) {
+			int idx = chunk->GetObjectIndexById(id);
 
-	//		if (idx != -1)
-	//			name = chunk->GetWorldObjectStatusByIndex(idx).objectData->name;
-	//	}
+			if (idx != -1)
+				name = chunk->GetWorldObjectStatusByIndex(idx).objectData->name;
+		}
 
-	//	if (ImGui::BeginCombo(label, name)) {
-	//		for (auto* chunk : objWorld->GetWorldChunks()) {
-	//			for (auto* layers : chunk->GetLayers()) {
-	//				for (auto* obj : layers->GetResource()->GetObjects()) {
-	//					if (edited |= ImGui::Selectable(obj->name))
-	//						id = obj->id;
+		bool isOpen = ImGui::BeginCombo(label, name);
 
-	//					if (id == obj->id)
-	//						ImGui::SetItemDefaultFocus();
-	//				}
-	//			}
-	//		}
-	//		ImGui::EndCombo();
-	//	}
-	//}
+		if (ImGui::BeginDragDropTarget()) {
+			if (auto* payload = ImGui::AcceptDragDropPayload("ObjectData")) {
+				auto* objData = *static_cast<hh::game::ObjectData**>(payload->Data);
+
+				id = objData->id;
+				edited = true;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		if (isOpen) {
+			for (auto* chunk : objWorld->GetWorldChunks()) {
+				for (auto* layers : chunk->GetLayers()) {
+					for (auto* obj : layers->GetResource()->GetObjects()) {
+						if (edited |= ImGui::Selectable(obj->name))
+							id = obj->id;
+
+						if (id == obj->id)
+							ImGui::SetItemDefaultFocus();
+					}
+				}
+			}
+
+			ImGui::EndCombo();
+		}
+	}
     
     return edited;
 }

@@ -36,26 +36,26 @@ hh::fnd::RflClassMember gocActivatorSpawnerMembers[]{
 hh::fnd::RflClass gocActivatorSpawnerClass{ "GOCActivatorSpawner", nullptr, sizeof(GOCActivatorSpawner), nullptr, 0, gocActivatorSpawnerMembers, 2, nullptr };
 
 #ifndef DEVTOOLS_TARGET_SDK_wars
-ComponentData* CreateComponentData(const GOComponentRegistry::GOComponentRegistryItem* gocRegItem) {
-	auto* allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
-
-	size_t spawnerDataSize = gocRegItem->rflClass->GetSizeInBytes();
-	// We're placing both in 1 block here because TerminateObjectData only calls free on the ComponentData.
-	// If we had 2 allocations the spawner data would not be freed.
-	void* buf = new (std::align_val_t(16), allocator) char[sizeof(ComponentData) + spawnerDataSize];
-	void* spawnerData = reinterpret_cast<void*>(reinterpret_cast<size_t>(buf) + sizeof(ComponentData));
-
-	if (!strcmp(gocRegItem->name, "Model"))
-		new (spawnerData) GOCVisualModelSpawner{ allocator };
-	else if (!strcmp(gocRegItem->name, "SimpleAnimation"))
-		new (spawnerData) GOCSimpleAnimationSpawner{ allocator };
-	else if (!strcmp(gocRegItem->name, "RangeSpawning"))
-		new (spawnerData) GOCActivatorSpawner{};
-	else
-		assert(false);
-
-	return new (buf) ComponentData{ gocRegItem->name, spawnerData, spawnerDataSize };
-}
+//ComponentData* CreateComponentData(const GOComponentRegistry::GOComponentRegistryItem* gocRegItem) {
+//	auto* allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
+//
+//	size_t spawnerDataSize = gocRegItem->rflClass->GetSizeInBytes();
+//	// We're placing both in 1 block here because TerminateObjectData only calls free on the ComponentData.
+//	// If we had 2 allocations the spawner data would not be freed.
+//	void* buf = new (std::align_val_t(16), allocator) char[sizeof(ComponentData) + spawnerDataSize];
+//	void* spawnerData = reinterpret_cast<void*>(reinterpret_cast<size_t>(buf) + sizeof(ComponentData));
+//
+//	if (!strcmp(gocRegItem->name, "Model"))
+//		new (spawnerData) GOCVisualModelSpawner{ allocator };
+//	else if (!strcmp(gocRegItem->name, "SimpleAnimation"))
+//		new (spawnerData) GOCSimpleAnimationSpawner{ allocator };
+//	else if (!strcmp(gocRegItem->name, "RangeSpawning"))
+//		new (spawnerData) GOCActivatorSpawner{};
+//	else
+//		assert(false);
+//
+//	return new (buf) ComponentData{ gocRegItem->name, spawnerData, spawnerDataSize };
+//}
 #endif
 
 bool Editor(const char* label, hh::game::ObjectTransformData& obj)
@@ -76,7 +76,11 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 	auto* objSystem = GameObjectSystem::GetInstance();
 
 	Viewer("Id", obj.id);
+#ifdef DEVTOOLS_TARGET_SDK_wars
 	Viewer("Name", obj.name);
+#else
+	Editor("Name", obj.name);
+#endif
 	ImGui::Text("Class: %s", obj.gameObjectClass);
 	Viewer("Parent object id", obj.parentID);
 
@@ -111,34 +115,34 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 		}
 	}
 
-	if (ImGui::Button("Add component..."))
-		ImGui::OpenPopup("ComponentConfigSelection");
+	//if (ImGui::Button("Add component..."))
+	//	ImGui::OpenPopup("ComponentConfigSelection");
 
-	if (ImGui::BeginPopup("ComponentConfigSelection")) {
-		for (auto* gocRegItem : objSystem->goComponentRegistry->GetComponents()) {
-			if (ImGui::Selectable(gocRegItem->name)) {
-				auto* allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
+	//if (ImGui::BeginPopup("ComponentConfigSelection")) {
+	//	for (auto* gocRegItem : objSystem->goComponentRegistry->GetComponents()) {
+	//		if (ImGui::Selectable(gocRegItem->name)) {
+	//			auto* allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
 
-				if (!obj.flags.test(ObjectData::Flag::COMPONENT_DATA_NEEDS_TERMINATION)) {
+	//			if (!obj.flags.test(ObjectData::Flag::COMPONENT_DATA_NEEDS_TERMINATION)) {
 
-					csl::ut::MoveArray<ComponentData*> componentDatas{ allocator };
+	//				csl::ut::MoveArray<ComponentData*> componentDatas{ allocator };
 
-					for (auto* origCData : obj.componentData) {
-						auto* gocRegItem = GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName(origCData->type);
-						auto* componentData = CreateComponentData(gocRegItem);
-						rflops::Copy::Apply(componentData->data, origCData->data, gocRegItem->rflClass);
-						componentDatas.push_back(componentData);
-					}
+	//				for (auto* origCData : obj.componentData) {
+	//					auto* gocRegItem = GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName(origCData->type);
+	//					auto* componentData = CreateComponentData(gocRegItem);
+	//					rflops::Copy::Apply(componentData->data, origCData->data, gocRegItem->rflClass);
+	//					componentDatas.push_back(componentData);
+	//				}
 
-					obj.componentData = std::move(componentDatas);
-					obj.flags.set(ObjectData::Flag::COMPONENT_DATA_NEEDS_TERMINATION);
-				}
+	//				obj.componentData = std::move(componentDatas);
+	//				obj.flags.set(ObjectData::Flag::COMPONENT_DATA_NEEDS_TERMINATION);
+	//			}
 
-				obj.componentData.push_back(CreateComponentData(gocRegItem));
-			}
-		}
-		ImGui::EndPopup();
-	}
+	//			obj.componentData.push_back(CreateComponentData(gocRegItem));
+	//		}
+	//	}
+	//	ImGui::EndPopup();
+	//}
 #endif
 
 	if (obj.spawnerData) {

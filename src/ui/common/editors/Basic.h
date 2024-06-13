@@ -15,7 +15,7 @@ static bool Editor(const char* label, Eigen::Matrix<T, Rows, Cols>& mat) {
 
 	ImGui::PushID(label);
 	for (int i = 0; i < Cols; i++) {
-		ImGui::PushID(i++);
+		ImGui::PushID(i);
 		edited |= DragScalar(label, cols[i]);
 		ImGui::PopID();
 	}

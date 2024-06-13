@@ -215,7 +215,7 @@ public:
 	static bool VisitArrayClassMember(void* obj, const hh::fnd::RflClassMember* member, size_t size, F f) {
 		return MemberScope(member, [&]() {
 			bool edited{};
-			if (ImGui::TreeNode("Array", "%s[0..%zd]", currentMemberName, size - 1)) {
+			if (ImGui::TreeNode(currentMemberName, "%s[0..%zd]", currentMemberName, size - 1)) {
 				edited = f(obj);
 				ImGui::TreePop();
 			}

@@ -5,7 +5,7 @@
 #include "Desktop.h"
 #include "SettingsManager.h"
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
-//#include <hot-reload/ReloadManager.h>
+#include <hot-reload/ReloadManager.h>
 
 static ID3D11Device* device;
 static ID3D11DeviceContext* deviceContext;
@@ -107,6 +107,12 @@ HOOK(void*, __fastcall, SwapChainHook, displaySwapDeviceConstructorAddr, void* i
 	return originalSwapChainHook(in_pThis, in_pSwapChain);
 }
 
+HOOK(hh::game::GameObject*, __fastcall, RespawnByObjectIdHook, 0x140D4B2B0, hh::game::ObjectWorldChunk* self, hh::game::ObjectId* id)
+{
+	auto idx = self->GetObjectIndexById({ 0x070b975965cb66d7ull, 0x670a25b1735e3568ull });
+	return originalRespawnByObjectIdHook(self, id);
+}
+
 //HOOK(float, __fastcall, MouseGetInputValue, 0x14076ED20, hh::hid::MouseWin32 * a1, unsigned int inputId)
 //{
 //	if (!Context::visible || Context::passThroughMouse || ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
@@ -138,6 +144,7 @@ void Context::install_hooks()
 	INSTALL_HOOK(GameApplication_Reset);
 	INSTALL_HOOK(WndProcHook);
 	INSTALL_HOOK(SwapChainHook);
+	INSTALL_HOOK(RespawnByObjectIdHook);
 	InstallInputHooks();
 	//INSTALL_HOOK(MouseGetInputValue);
 	//INSTALL_HOOK(RenderingEngineRangers_SetupMainRenderUnit);
@@ -177,12 +184,12 @@ void Context::init() {
 	io.Fonts->Build();
 
 	auto* moduleAllocator = hh::fnd::MemoryRouter::GetModuleAllocator();
-	auto* allocator = moduleAllocator;
-	//static hh::fnd::ThreadSafeTlsfHeapAllocator devtoolsAllocator{ "devtools" };
-	//devtoolsAllocator.Setup(moduleAllocator, { 100 * 1024 * 1024, true });
-	//auto* allocator = &devtoolsAllocator;
+	//auto* allocator = moduleAllocator;
+	static hh::fnd::ThreadSafeTlsfHeapAllocator devtoolsAllocator{ "devtools" };
+	devtoolsAllocator.Setup(moduleAllocator, { 100 * 1024 * 1024, true });
+	auto* allocator = &devtoolsAllocator;
 
-	//ReloadManager::instance = new (allocator) ReloadManager(allocator);
+	ReloadManager::instance = new (allocator) ReloadManager(allocator);
 	RESOLVE_STATIC_VARIABLE(hh::game::DebugCameraManager::instance) = hh::game::DebugCameraManager::Create();
 	GOCVisualDebugDrawRenderer::instance = new (allocator) GOCVisualDebugDrawRenderer(allocator);
 	Desktop::instance = new (allocator) Desktop{ allocator };

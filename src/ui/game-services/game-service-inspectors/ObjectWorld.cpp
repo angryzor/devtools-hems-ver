@@ -41,6 +41,15 @@ void RenderGameServiceInspector(hh::game::ObjectWorld& objWorld) {
 						CheckboxFlags("Shutdown", status.flags, WorldObjectStatus::Flag::SHUTDOWN);
 						CheckboxFlags("No restart", status.flags, WorldObjectStatus::Flag::NO_RESTART);
 
+						if (ImGui::Button("Spawn"))
+							chunk->Spawn(status.objectData);
+						if (ImGui::Button("Despawn"))
+							chunk->Despawn(status.objectData);
+						if (ImGui::Button("Shutdown"))
+							status.Shutdown();
+						if (ImGui::Button("Restart"))
+							status.Restart();
+
 #ifndef DEVTOOLS_TARGET_SDK_wars
 						Editor("Spawn priority", status.spawnPriority);
 #endif
@@ -53,9 +62,6 @@ void RenderGameServiceInspector(hh::game::ObjectWorld& objWorld) {
 				}
 			}
 			ImGui::TreePop();
-
-			if (objWorld.packFile)
-				Viewer("Packfile", objWorld.packFile->GetName());
 		}
 	}
 }

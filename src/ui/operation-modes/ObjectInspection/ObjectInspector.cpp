@@ -26,6 +26,8 @@ typedef std::tuple<
 #include "component-inspectors/GOCTransform.h"
 #include "component-inspectors/GOCCollider.h"
 #include "component-inspectors/GOCAnimator.h"
+#include "component-inspectors/GOCActivator.h"
+#include "component-inspectors/GOCVisual.h"
 #include "component-inspectors/GOCEvent.h"
 #include "component-inspectors/GOCPlayerBlackboard.h"
 #include "component-inspectors/GOCPlayerKinematicParams.h"
@@ -34,10 +36,14 @@ typedef std::tuple<
 
 typedef std::tuple<
 	hh::game::GOCTransform,
+	hh::game::GOCActivator,
 	hh::physics::GOCSphereCollider,
 	hh::physics::GOCBoxCollider,
 	hh::physics::GOCCapsuleCollider,
 	hh::physics::GOCCylinderCollider,
+	hh::gfx::GOCVisual,
+	hh::gfx::GOCVisualTransformed,
+	hh::gfx::GOCVisualModel,
 	hh::anim::GOCAnimator,
 	app_cmn::camera::GOCCamera,
 	app::game::GOCEventCollision,
@@ -52,11 +58,13 @@ using namespace hh::game;
 
 
 template<typename T>
-bool RenderComponentInspectorT(hh::game::GOComponent& service) {
-	bool result{ service.pStaticClass == T::GetClass() };
+bool RenderComponentInspectorT(hh::game::GOComponent& component) {
+	bool result{ component.pStaticClass == T::GetClass() };
 
 	if (result) {
-		RenderComponentInspector(static_cast<T&>(service));
+		ImGui::PushID(&component);
+		RenderComponentInspector(static_cast<T&>(component));
+		ImGui::PopID();
 	}
 
 	return result;
@@ -67,8 +75,8 @@ class ComponentIterator;
 template<typename... T>
 class ComponentIterator<std::tuple<T...>> {
 public:
-	static void Render(hh::game::GOComponent& service) {
-		(RenderComponentInspectorT<T>(service) || ...) || (ImGui::Text("Inspector for this component not yet implemented"), true);
+	static void Render(hh::game::GOComponent& component) {
+		(RenderComponentInspectorT<T>(component) || ...) || (ImGui::Text("Inspector for this component not yet implemented"), true);
 	}
 };
 
@@ -127,6 +135,7 @@ void ObjectInspector::Render() {
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 				if (ImGui::BeginTabItem("Update configuration")) {
 					if (ImGui::BeginChild("Content")) {
+						CheckboxFlags("Asleep", focusedObject->statusFlags, GameObject::StatusFlags::ASLEEP);
 						ImGui::Text("GameObject requested update phases:");
 						ImGui::BeginGroup();
 						CheckboxFlags("PreAnim", focusedObject->forcedUpdateFlags, UpdatingPhase::PRE_ANIM);

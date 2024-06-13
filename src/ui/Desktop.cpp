@@ -12,7 +12,16 @@
 #include <utilities/math/MathUtils.h>
 #include <utilities/CompatibleObject.h>
 #include "common/editors/Basic.h"
-#include <TheSurprise.h>
+#include "common/inputs/Basic.h"
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+#include <the-surprise/FireworkSpectacleDesc.h>
+#include <the-surprise/ObjFireworksSpectacle.h>
+#include <the-surprise/ObjHEMSMember.h>
+#include <the-surprise/spectacle-responders/ObjSpectacleEffectEmitter.h>
+#include <the-surprise/spectacle-responders/ObjSpectacleObjectStatusController.h>
+#include <the-surprise/SurpriseService.h>
+#include <the-surprise/Timings.h>
+#endif
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -79,17 +88,24 @@ void Desktop::Render() {
 	//	ImGui::Text("%d", *reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
 	//	ImGui::Checkbox("grind", reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
 	//}
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 	static ObjFireworksSpectacle* spectacle{};
+	static FireworkSpectacleDesc* timings{};
 	if (auto* gameManager = GameManager::GetInstance()) {
+		if (spectacle)
+			ImGui::Text("At index %zd, runTime %f", spectacle->index, spectacle->runTime);
 		if (ImGui::Button("Generate timings RFL")) {
 			ReflectionSerializer::SerializeToFile(L"surprising_timings.rfl", &fireworkDescs, FireworkSpectacleDesc::rflClass);
 		}
+		ImGui::SameLine();
 		if (ImGui::Button("Load Surprise Service")) {
 			auto* s = gameManager->CreateService<SurpriseService>(hh::fnd::MemoryRouter::GetModuleAllocator());
 			gameManager->RegisterService(s);
 
-			BuiltinTypeRegistry::GetTypeInfoRegistry()->Register(&ObjFireworkLauncherSpawner::typeInfo);
-			BuiltinTypeRegistry::GetClassNameRegistry()->Register(&ObjFireworkLauncherSpawner::rflClass);
+			BuiltinTypeRegistry::GetTypeInfoRegistry()->Register(&ObjSpectacleEffectEmitterSpawner::typeInfo);
+			BuiltinTypeRegistry::GetClassNameRegistry()->Register(&ObjSpectacleEffectEmitterSpawner::rflClass);
+			BuiltinTypeRegistry::GetTypeInfoRegistry()->Register(&ObjSpectacleObjectStatusControllerSpawner::typeInfo);
+			BuiltinTypeRegistry::GetClassNameRegistry()->Register(&ObjSpectacleObjectStatusControllerSpawner::rflClass);
 			BuiltinTypeRegistry::GetTypeInfoRegistry()->Register(&ObjHEMSMemberSpawner::typeInfo);
 			BuiltinTypeRegistry::GetClassNameRegistry()->Register(&ObjHEMSMemberSpawner::rflClass);
 			BuiltinTypeRegistry::GetTypeInfoRegistry()->Register(&FireworkDesc::typeInfo);
@@ -99,7 +115,9 @@ void Desktop::Render() {
 			BuiltinTypeRegistry::GetTypeInfoRegistry()->Register(&FireworkSpectacleDesc::typeInfo);
 			BuiltinTypeRegistry::GetClassNameRegistry()->Register(&FireworkSpectacleDesc::rflClass);
 
-			const hh::game::GameObjectClass* goClass = ObjFireworkLauncher::GetClass();
+			const hh::game::GameObjectClass* goClass = ObjSpectacleEffectEmitter::GetClass();
+			GameObjectSystem::GetInstance()->gameObjectRegistry->AddObject(&goClass);
+			goClass = ObjSpectacleObjectStatusController::GetClass();
 			GameObjectSystem::GetInstance()->gameObjectRegistry->AddObject(&goClass);
 			goClass = ObjHEMSMember::GetClass();
 			GameObjectSystem::GetInstance()->gameObjectRegistry->AddObject(&goClass);
@@ -114,6 +132,11 @@ void Desktop::Render() {
 			resourceLoader->LoadResource(InplaceTempUri{ "mods/angryzor_devtools/surprising_objects.gedit" }, hh::game::ResObjectWorld::GetTypeInfo(), 0, 1, locale);
 			resourceLoader->LoadResource(InplaceTempUri{ "mods/angryzor_devtools/surprising_pous.gedit" }, hh::game::ResObjectWorld::GetTypeInfo(), 0, 1, locale);
 		}
+		ImGui::SameLine();
+		if (ImGui::Button("Load timings")) {
+			timings = ResourceManager::GetInstance()->GetResource<hh::fnd::ResReflectionT<FireworkSpectacleDesc>>("surprising_timings")->GetData();
+		}
+		ImGui::SameLine();
 		if (ImGui::Button("Load objects")) {
 			auto* resource = ResourceManager::GetInstance()->GetResource<ResObjectWorld>("surprising_objects");
 			auto* layer = ObjectWorldChunkLayer::Create(hh::fnd::MemoryRouter::GetModuleAllocator(), resource);
@@ -125,8 +148,8 @@ void Desktop::Render() {
 			gameManager->GetService<ObjectWorld>()->GetWorldChunks()[0]->AddLayer(layer);
 			gameManager->GetService<ObjectWorld>()->GetWorldChunks()[0]->SetLayerEnabled("surprising_pous", true);
 		}
+		ImGui::SameLine();
 		if (spectacle) {
-			ImGui::Text("At index %zd, runTime %f", spectacle->index, spectacle->runTime);
 			if (ImGui::Button("End fireworks spectacle")) {
 				spectacle->Kill();
 				spectacle = nullptr;
@@ -137,8 +160,60 @@ void Desktop::Render() {
 				gameManager->AddGameObject(spectacle, "Fireworks spectacle", false, nullptr, nullptr);
 			}
 		}
-	}
 
+		if (timings) {
+			ImGui::SameLine();
+			if (ImGui::Button("Save"))
+				ReflectionSerializer::SerializeToFile(L"./Mods/devtools/raw/mods/angryzor_devtools/surprising_timings.rfl", timings, FireworkSpectacleDesc::rflClass);
+			static size_t fallBackIndex{};
+			size_t& index{ spectacle ? spectacle->index : fallBackIndex };
+			Editor("Index", index);
+			static short bank{};
+			static short bankMin{};
+			static short bankMax{ 15 };
+			SliderScalar("Half Bank", bank, &bankMin, &bankMax);
+			//ImGui::PushStyleColor(ImGuiCol_TableBorderLight, { 0.0f, 0.0f, 0.0f, 1.0f });
+			if (ImGui::BeginTable("Timings", 33, ImGuiTableFlags_BordersInner)) {
+				ImGui::TableSetupColumn("Time", ImGuiTableColumnFlags_WidthStretch);
+				for (short i = 0; i < 32; i++) {
+					char header[10];
+					snprintf(header, 10, "%d", i);
+					ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, 48.0f);
+				}
+
+				for (size_t t = index; t < std::min(index + 32, sizeof(timings->triggers) / sizeof(FireworkControlDesc)); t++) {
+					ImGui::PushID(t);
+					ImGui::TableNextRow();
+					ImGui::TableNextColumn();
+					ImGui::Text("%s", fireworkDebugDescs[t]);
+
+					for (short i = 0; i < 32; i++) {
+						ImGui::TableNextColumn();
+						ImGui::PushID(i);
+						for (size_t subBank = 0; subBank < 2; subBank++) {
+							ImGui::PushID(subBank);
+							if (subBank) {
+								ImGui::SameLine();
+								ImGui::PushStyleColor(ImGuiCol_FrameBg, { 1.0f, 0.7f, 0.7f, 0.5f });
+							}
+							else {
+								ImGui::PushStyleColor(ImGuiCol_FrameBg, { 0.7f, 1.0f, 0.7f, 0.5f });
+							}
+							ImGui::CheckboxFlags("", &timings->triggers[t].signals[bank * 2 + subBank], 1 << i);
+							ImGui::PopStyleColor();
+							ImGui::PopID();
+						}
+						ImGui::PopID();
+					}
+
+					ImGui::PopID();
+				}
+				ImGui::EndTable();
+			}
+			//ImGui::PopStyleColor();
+		}
+	}
+#endif
 	//static char packfileName[300];
 	//ImGui::InputText("Packfile", packfileName, sizeof(packfileName));
 	//if (ImGui::Button("Put packfile in objectworld lol"))
@@ -253,8 +328,9 @@ void Desktop::HandleMousePicking()
 				auto mouseEnd = ImGui::GetMousePos();
 				auto frustum = ScreenRectToFrustum(mouseStart, mouseEnd, (camera->viewportData.projMatrix * camera->viewportData.viewMatrix).inverse());
 
-				ImGui::Begin("Overlay");
-				ImGui::GetWindowDrawList()->AddRectFilled(mouseStart, mouseEnd, 0x40FFFFFF);
+				if (ImGui::Begin("Overlay")) {
+					ImGui::GetWindowDrawList()->AddRectFilled(mouseStart, mouseEnd, 0x40FFFFFF);
+				}
 				ImGui::End();
 
 				pickedObjects.clear();

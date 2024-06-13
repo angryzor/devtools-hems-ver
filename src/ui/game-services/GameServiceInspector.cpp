@@ -25,8 +25,9 @@ typedef std::tuple<
 #include "game-service-inspectors/CameraService.h"
 #include "game-service-inspectors/GameModeResourceManager.h"
 #include "game-service-inspectors/TerrainManager.h"
+#include "game-service-inspectors/SoundDirector.h"
 
-#include <TheSurprise.h>
+#include <the-surprise/SurpriseService.h>
 #include <ui/common/inputs/Basic.h>
 #include <ui/common/editors/Basic.h>
 
@@ -46,6 +47,7 @@ typedef std::tuple<
 	app::camera::CameraService,
 	app::game::GameModeResourceManager,
 	app::trr::TerrainManager,
+	app::snd::SoundDirector,
 	SurpriseService
 > InspectableServices;
 
