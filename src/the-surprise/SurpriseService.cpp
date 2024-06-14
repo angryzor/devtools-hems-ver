@@ -73,15 +73,15 @@ void SurpriseService::GameObjectRemovedCallback(GameManager* gameManager, GameOb
 }
 
 void SurpriseService::AddSignalListener(SpectacleSignalId signalId, const hh::fnd::Handle<hh::game::GameObject>& launcher) {
-    signalListeners[signalId.bank][signalId.id].push_back(launcher);
+    signalListeners[signalId.channel][signalId.id].push_back(launcher);
 }
 
 void SurpriseService::RemoveSignalListener(SpectacleSignalId signalId, const hh::fnd::Handle<hh::game::GameObject>& launcher) {
-    signalListeners[signalId.bank][signalId.id].remove(signalListeners[signalId.bank][signalId.id].find(launcher));
+    signalListeners[signalId.channel][signalId.id].remove(signalListeners[signalId.channel][signalId.id].find(launcher));
 }
 
 csl::ut::MoveArray<hh::fnd::Handle<hh::game::GameObject>>& SurpriseService::GetSignalListeners(SpectacleSignalId signalId) {
-    return signalListeners[signalId.bank][signalId.id];
+    return signalListeners[signalId.channel][signalId.id];
 }
 
 void SurpriseService::AddHEMSMember(GameObject* kodama)
@@ -93,3 +93,38 @@ void SurpriseService::AddHEMSMember(GameObject* kodama)
     pGameManager->AddGameObject(hemsMember, kodamaId < sizeof(modderMembers) / sizeof(const char*) ? modderMembers[kodamaId] : normalMembers[mt() % (sizeof(modderMembers) / sizeof(const char*))], false, &pos, kodama);
     //hemsMembers.Insert(kodama, hemsMember);
 }
+
+//class membuf : public std::basic_streambuf<char> {
+//public:
+//    membuf(const uint8_t* p, size_t l) {
+//        setg((char*)p, (char*)p, (char*)p + l);
+//    }
+//};
+//
+//class memstream : public std::istream {
+//public:
+//    memstream(const uint8_t* p, size_t l) :
+//        std::istream(&_buffer),
+//        _buffer(p, l) {
+//        rdbuf(&_buffer);
+//    }
+//
+//private:
+//    membuf _buffer;
+//};
+//
+//void ResMidiFile::Load(void* data, size_t size)
+//{
+//    memstream input{ static_cast<uint8_t*>(data), size };
+//    midiFile.readSmf(input);
+//    midiFile.doTimeAnalysis();
+//    midiFile.joinTracks();
+//}
+//
+//void ResMidiFile::Unload()
+//{
+//}
+//
+//void ResMidiFile::Reload(void* data, size_t size)
+//{
+//}

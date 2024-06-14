@@ -6,8 +6,8 @@ using namespace hh::game;
 
 void* ObjSpectacleObjectStatusControllerSpawner::Construct(void* pInstance, csl::fnd::IAllocator* pAllocator) {
     auto* self = static_cast<ObjSpectacleObjectStatusControllerSpawner*>(pInstance);
-    self->onSignal = SpectacleSignalId{};
-    self->offSignal = SpectacleSignalId{};
+    self->signalId = SpectacleSignalId{};
+    self->unused = SpectacleSignalId{};
     new (&self->targets) csl::ut::MoveArray<ObjectId>{ pAllocator };
     return self;
 }
@@ -20,8 +20,8 @@ void ObjSpectacleObjectStatusControllerSpawner::Clean(void* pInstance) {
 }
 
 const RflClassMember ObjSpectacleObjectStatusControllerSpawner::rflClassMembers[3] = {
-    { "onSignal", &SpectacleSignalId::rflClass, nullptr, RflClassMember::Type::TYPE_STRUCT, RflClassMember::Type::TYPE_VOID, 0, 0, offsetof(ObjSpectacleObjectStatusControllerSpawner, onSignal), nullptr},
-    { "offSignal", &SpectacleSignalId::rflClass, nullptr, RflClassMember::Type::TYPE_STRUCT, RflClassMember::Type::TYPE_VOID, 0, 0, offsetof(ObjSpectacleObjectStatusControllerSpawner, offSignal), nullptr},
+    { "signalId", &SpectacleSignalId::rflClass, nullptr, RflClassMember::Type::TYPE_STRUCT, RflClassMember::Type::TYPE_VOID, 0, 0, offsetof(ObjSpectacleObjectStatusControllerSpawner, signalId), nullptr},
+    { "unused", &SpectacleSignalId::rflClass, nullptr, RflClassMember::Type::TYPE_STRUCT, RflClassMember::Type::TYPE_VOID, 0, 0, offsetof(ObjSpectacleObjectStatusControllerSpawner, unused), nullptr},
     { "targets", nullptr, nullptr, RflClassMember::Type::TYPE_ARRAY, RflClassMember::Type::TYPE_OBJECT_ID, 0, 0, offsetof(ObjSpectacleObjectStatusControllerSpawner, targets), nullptr },
 };
 
@@ -34,35 +34,25 @@ bool ObjSpectacleObjectStatusController::ProcessMessage(Message& message)
     case MessageID::PARAM_CHANGED_IN_EDITOR: {
         auto* worldData = GetWorldDataByClass<ObjSpectacleObjectStatusControllerSpawner>();
 
-        if (onSignal.IsValid())
-            gameManager->GetService<SurpriseService>()->RemoveSignalListener(onSignal, this);
-        onSignal = worldData->onSignal;
-        if (onSignal.IsValid())
-            gameManager->GetService<SurpriseService>()->AddSignalListener(onSignal, this);
-
-        if (offSignal.IsValid())
-            gameManager->GetService<SurpriseService>()->RemoveSignalListener(offSignal, this);
-        offSignal = worldData->offSignal;
-        if (offSignal.IsValid())
-            gameManager->GetService<SurpriseService>()->AddSignalListener(offSignal, this);
+        if (signalId.IsValid())
+            gameManager->GetService<SurpriseService>()->RemoveSignalListener(signalId, this);
+        signalId = worldData->signalId;
+        if (signalId.IsValid())
+            gameManager->GetService<SurpriseService>()->AddSignalListener(signalId, this);
 
         return true;
     }
     case MessageID::GET_DEBUG_COMMENT_IN_EDITOR: {
         auto& msg = static_cast<hh::dbg::MsgGetDebugCommentInEditor&>(message);
-        snprintf(msg.comment, sizeof(msg.comment), "On: %d:%d - Off: %d:%d", onSignal.bank, onSignal.id, offSignal.bank, offSignal.id);
+        snprintf(msg.comment, sizeof(msg.comment), "On/Off: %d:%d", signalId.channel, signalId.id);
         return true;
     }
-    case SPECTACLE_SIGNAL_FIRED: {
-        auto& msg = static_cast<MsgSpectacleSignalFired&>(message);
-
-        if (msg.signalId == onSignal)
-            StartTargets();
-        else if (msg.signalId == offSignal)
-            StopTargets();
-
+    case SPECTACLE_MIDI_NOTE_ON:
+        StartTargets();
         return true;
-    }
+    case SPECTACLE_MIDI_NOTE_OFF:
+        StopTargets();
+        return true;
     default:
         return GameObject::ProcessMessage(message);
     }
@@ -74,26 +64,20 @@ void ObjSpectacleObjectStatusController::AddCallback(GameManager* gameManager)
         StopTargets();
 
     auto* config = GetWorldDataByClass<ObjSpectacleObjectStatusControllerSpawner>();
-    onSignal = config->onSignal;
-    offSignal = config->offSignal;
+    signalId = config->signalId;
 
-    if (onSignal.IsValid())
-        gameManager->GetService<SurpriseService>()->AddSignalListener(onSignal, this);
-    if (offSignal.IsValid())
-        gameManager->GetService<SurpriseService>()->AddSignalListener(offSignal, this);
+    if (signalId.IsValid())
+        gameManager->GetService<SurpriseService>()->AddSignalListener(signalId, this);
 }
 
 void ObjSpectacleObjectStatusController::RemoveCallback(GameManager* gameManager)
 {
     auto* config = GetWorldDataByClass<ObjSpectacleObjectStatusControllerSpawner>();
 
-    if (onSignal.IsValid())
-        gameManager->GetService<SurpriseService>()->RemoveSignalListener(onSignal, this);
-    if (offSignal.IsValid())
-        gameManager->GetService<SurpriseService>()->RemoveSignalListener(offSignal, this);
+    if (signalId.IsValid())
+        gameManager->GetService<SurpriseService>()->RemoveSignalListener(signalId, this);
 
-    onSignal = {};
-    offSignal = {};
+    signalId = {};
 }
 
 void ObjSpectacleObjectStatusController::StartTargets() const

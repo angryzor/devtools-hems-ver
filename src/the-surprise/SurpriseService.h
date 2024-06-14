@@ -2,9 +2,18 @@
 #include "SpectacleSignalId.h"
 #include "FireworkSpectacleDesc.h"
 #include "ObjHEMSMember.h"
+#include <MidiFile.h>
 
 using namespace hh::fnd;
 using namespace hh::game;
+
+//class ResMidiFile : public hh::fnd::ManagedResource {
+//    smf::MidiFile midiFile;
+//public:
+//    virtual void Load(void* data, size_t size) override;
+//    virtual void Unload() override;
+//    virtual void Reload(void* data, size_t size) override;
+//};
 
 class SurpriseService : public hh::game::GameService, public hh::game::GameManagerListener {
 public:

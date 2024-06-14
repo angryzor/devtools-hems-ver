@@ -130,23 +130,12 @@ bool ObjSpectacleEffectEmitter::ProcessMessage(Message& message) {
     }
     case MessageID::GET_DEBUG_COMMENT_IN_EDITOR: {
         auto& msg = static_cast<hh::dbg::MsgGetDebugCommentInEditor&>(message);
-        snprintf(msg.comment, sizeof(msg.comment), "Emit: %d:%d", signalId.bank, signalId.id);
+        snprintf(msg.comment, sizeof(msg.comment), "Emit: %d:%d", signalId.channel, signalId.id);
         return true;
     }
-    case SPECTACLE_SIGNAL_FIRED: {
-        auto* config = GetWorldDataByClass<ObjSpectacleEffectEmitterSpawner>();
-        auto& msg = static_cast<MsgSpectacleSignalFired&>(message);
-
-        if (msg.fireworkDesc.travelTime == 0.0f) {
-            GetComponent<GOCEffect>()->CreateEffect(config->effectName, nullptr);
-        }
-        //auto* firework = static_cast<ObjFirework*>(ObjFirework::GetClass()->instantiator(GetAllocator()));
-        //firework->Setup(this);
-
-        //WorldPosition position{};
-        //gameManager->AddGameObject(firework, nullptr, false, &position, this);
+    case SPECTACLE_MIDI_NOTE_ON:
+        GetComponent<GOCEffect>()->CreateEffect(GetWorldDataByClass<ObjSpectacleEffectEmitterSpawner>()->effectName, nullptr);
         return true;
-    }
     default:
         return GameObject::ProcessMessage(message);
     }

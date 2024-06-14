@@ -50,14 +50,23 @@ public:
     static const hh::fnd::RflClass rflClass;
 };
 
-constexpr hh::fnd::MessageID SPECTACLE_SIGNAL_FIRED{ static_cast<hh::fnd::MessageID>(42069) };
+constexpr hh::fnd::MessageID SPECTACLE_MIDI_NOTE_ON{ static_cast<hh::fnd::MessageID>(42069) };
+constexpr hh::fnd::MessageID SPECTACLE_MIDI_NOTE_OFF{ static_cast<hh::fnd::MessageID>(42070) };
 
-class MsgSpectacleSignalFired : public app::fnd::AppMessageCustom<MsgSpectacleSignalFired> {
+class MsgSpectacleMidiNoteOn : public app::fnd::AppMessageCustom<MsgSpectacleMidiNoteOn> {
 public:
     SpectacleSignalId signalId{};
-    FireworkDesc fireworkDesc{};
 
-    MsgSpectacleSignalFired(SpectacleSignalId signalId, const FireworkDesc& fireworkDesc) : app::fnd::AppMessageCustom<MsgSpectacleSignalFired>{ SPECTACLE_SIGNAL_FIRED }, signalId{ signalId }, fireworkDesc{ fireworkDesc } {
+    MsgSpectacleMidiNoteOn(SpectacleSignalId signalId) : app::fnd::AppMessageCustom<MsgSpectacleMidiNoteOn>{ SPECTACLE_MIDI_NOTE_ON }, signalId{ signalId } {
+
+    }
+};
+
+class MsgSpectacleMidiNoteOff : public app::fnd::AppMessageCustom<MsgSpectacleMidiNoteOff> {
+public:
+    SpectacleSignalId signalId{};
+
+    MsgSpectacleMidiNoteOff(SpectacleSignalId signalId) : app::fnd::AppMessageCustom<MsgSpectacleMidiNoteOff>{ SPECTACLE_MIDI_NOTE_OFF }, signalId{ signalId } {
 
     }
 };

@@ -72,7 +72,7 @@ foreach(DEVTOOLS_TARGET_SDK rangers)# wars)
             VS_DEBUGGER_WORKING_DIRECTORY ${DEBUGGER_WORKING_DIRECTORY}
     )
 
-    foreach(LIB ${DEVTOOLS_TARGET_SDK}-sdk HedgeLib filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imguizmo implot)
+    foreach(LIB ${DEVTOOLS_TARGET_SDK}-sdk HedgeLib filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imguizmo implot midifile)
         target_link_libraries(${DEVTOOLS_TARGET} PRIVATE ${LIB})
     endforeach()
 

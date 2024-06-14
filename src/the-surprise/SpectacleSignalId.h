@@ -1,7 +1,7 @@
 #pragma once
 
 struct SpectacleSignalId {
-    short bank{ -1 };
+    short channel{ -1 };
     short id{ -1 };
 
 private:

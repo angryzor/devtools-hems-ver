@@ -2,8 +2,8 @@
 #include <the-surprise/SpectacleSignalId.h>
 
 struct ObjSpectacleObjectStatusControllerSpawner {
-    SpectacleSignalId onSignal;
-    SpectacleSignalId offSignal;
+    SpectacleSignalId signalId;
+    SpectacleSignalId unused;
     csl::ut::MoveArray<hh::game::ObjectId> targets;
 
 private:
@@ -17,8 +17,7 @@ public:
 };
 
 class ObjSpectacleObjectStatusController : public hh::game::GameObject {
-    SpectacleSignalId onSignal{};
-    SpectacleSignalId offSignal{};
+    SpectacleSignalId signalId{};
 public:
     virtual bool ProcessMessage(hh::fnd::Message& message) override;
     virtual void AddCallback(hh::game::GameManager* gameManager) override;

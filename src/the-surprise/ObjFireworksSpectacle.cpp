@@ -7,43 +7,48 @@ using namespace hh::game;
 void ObjFireworksSpectacle::Update(UpdatingPhase phase, const SUpdateInfo& updateInfo) {
     switch (phase) {
     case UpdatingPhase::PRE_ANIM:
-        if (!spectacleDesc) {
-            Kill();
-            break;
-        }
-
-        float prevRunTime = runTime;
-        runTime += updateInfo.deltaTime;
-
-        auto* sdesc = spectacleDesc->GetData();
-
+        if (auto* soundDirector = gameManager->GetService<app::snd::SoundDirector>())
         if (auto* surpriseService = gameManager->GetService<SurpriseService>()) {
-            while (index < sizeof(sdesc->triggers) / sizeof(FireworkControlDesc) && sdesc->triggers[index].fireworkDesc.explodeTime - sdesc->triggers[index].fireworkDesc.travelTime <= runTime) {
-                auto& trigger = sdesc->triggers[index];
+            float playTime = soundDirector->GetBgmSoundHandle(0).GetPlayTime();
 
-                if (trigger.enabled) {
-                    for (short i = 0; i < NUM_BANKS; i++) {
-                        // Early exit without iteration and shifting.
-                        if (!trigger.signals[i])
-                            continue;
+            if (inFirstSection && playTime > 279.7350993377483443f) {
+                soundDirector->PlayBgm({ "bgm_lastboss", 2, 0.0f, 0.0f, 0.0f, 1.0f, 0, 0x10001, 0 });
+                inFirstSection = false;
+            }
 
-                        for (short j = 0; j < 32; j++) {
-                            if (trigger.signals[i] & (1 << j)) {
-                                SpectacleSignalId signalId{ i, j };
+            while (index < midiFile.getEventCount(0)) {
+                auto& midiEvent = midiFile.getEvent(0, index);
+                
+                if (static_cast<float>(midiEvent.tick) > playTime * 151.0f * static_cast<float>(midiFile.getTicksPerQuarterNote()) / 120.0f)
+                    break;
 
-                                for (auto listener : surpriseService->GetSignalListeners(signalId)) {
-                                    MsgSpectacleSignalFired msg{ signalId, trigger.fireworkDesc };
-                                    SendMessageImmToGameObject(listener, msg);
-                                }
-                            }
-                        }
+                if (midiEvent.track > NUM_BANKS) {
+                    index++;
+                    continue;
+                }
+
+                if (midiEvent.isNoteOn()) {
+                    SpectacleSignalId signalId{ static_cast<short>(midiEvent.track), static_cast<short>(midiEvent.getKeyNumber() - 60) };
+
+                    for (auto listener : surpriseService->GetSignalListeners(signalId)) {
+                        MsgSpectacleMidiNoteOn msg{ signalId };
+                        SendMessageImmToGameObject(listener, msg);
                     }
                 }
+                else if (midiEvent.isNoteOff()) {
+                    SpectacleSignalId signalId{ static_cast<short>(midiEvent.track), static_cast<short>(midiEvent.getKeyNumber() - 60) };
+
+                    for (auto listener : surpriseService->GetSignalListeners(signalId)) {
+                        MsgSpectacleMidiNoteOff msg{ signalId };
+                        SendMessageImmToGameObject(listener, msg);
+                    }
+                }
+
                 index++;
             }
         }
 
-        if (index >= sizeof(sdesc->triggers) / sizeof(FireworkControlDesc))
+        if (index >= midiFile.getEventCount(0))
             Kill();
 
         break;
@@ -51,7 +56,12 @@ void ObjFireworksSpectacle::Update(UpdatingPhase phase, const SUpdateInfo& updat
 }
 
 void ObjFireworksSpectacle::AddCallback(GameManager* gameManager) {
-    spectacleDesc = ResourceManager::GetInstance()->GetResource<ResReflectionT<FireworkSpectacleDesc>>("surprising_timings");
+    inFirstSection = true;
+
+    //spectacleDesc = ResourceManager::GetInstance()->GetResource<ResReflectionT<FireworkSpectacleDesc>>("surprising_timings");
+    midiFile.readSmf(".\\Mods\\devtools\\surprising_timings.mid");
+    midiFile.joinTracks();
+
     auto* soundDirector = gameManager->GetService<app::snd::SoundDirector>();
     soundDirector->PlayBgm({ "bgm_lastboss", 0, 0.0f, 0.0f, 0.0f, 1.0f, 0, 0x10001, 0 });
 }
