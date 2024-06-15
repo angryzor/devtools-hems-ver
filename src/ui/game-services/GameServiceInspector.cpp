@@ -36,6 +36,7 @@ void RenderGameServiceInspector(SurpriseService& service) {
 	ComboEnum("Mode", service.mode, surpriseModeNames);
 	Editor("Random threshold", service.randomThreshold);
 	Editor("Signal listeners", service.signalListeners);
+	Editor("Found HEMS members", service.isHEMSMemberFound);
 }
 
 typedef std::tuple<

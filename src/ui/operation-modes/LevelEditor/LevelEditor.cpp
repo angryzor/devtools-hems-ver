@@ -82,12 +82,7 @@ void LevelEditor::Render() {
 
 	// Object manipulation
 	if (focusedObjects.size() > 0) {
-		csl::ut::MoveArray<GameObject*> gameObjects{ hh::fnd::MemoryRouter::GetTempAllocator() };
-		for (auto* obj : focusedObjects)
-			if (auto* gameObject = focusedChunk->GetGameObjectByObjectId(obj->id))
-				gameObjects.push_back(gameObject);
-
-		haveSelectionAabb = CalcApproxAabb(gameObjects, selectionAabb);
+		haveSelectionAabb = CalcApproxAabb(focusedChunk, focusedObjects, selectionAabb);
 		HandleObjectManipulation();
 	}
 	else {
@@ -185,6 +180,29 @@ void LevelEditor::HandlePaste()
 	Select(pastedObjs);
 }
 
+void LevelEditor::RecalculateDependentTransforms(hh::game::ObjectData* objectData)
+{
+	// Copy changes to the live object if any.
+	if (auto* obj = focusedChunk->GetGameObjectByObjectId(objectData->id))
+		if (auto* gocTransform = obj->GetComponent<GOCTransform>())
+			UpdateGOCTransform(*objectData, *gocTransform);
+
+	for (auto* layer : focusedChunk->GetLayers()) {
+		for (auto* child : layer->GetResource()->GetObjects()) {
+			if (child->parentID == objectData->id) {
+				RecalculateAbsoluteTransform(*objectData, *child);
+				RecalculateDependentTransforms(child);
+			}
+		}
+	}
+}
+
+void LevelEditor::RecalculateDependentTransforms()
+{
+	for (auto* obj : focusedObjects)
+		RecalculateDependentTransforms(obj);
+}
+
 void LevelEditor::HandleObjectSelection() {
 	if (Desktop::instance->IsPickerMouseReleased())
 		Select(Desktop::instance->GetPickedObjects());
@@ -256,13 +274,9 @@ void LevelEditor::HandleObjectManipulation() {
 				// Update both transforms based on this changed absolute transform.
 				UpdateAbsoluteTransform(pivotTransform * preTransforms[i], *object);
 				i++;
-
-				// Copy changes to the live object if any.
-				if (auto* obj = focusedChunk->GetGameObjectByObjectId(object->id))
-					if (auto* gocTransform = obj->GetComponent<GOCTransform>())
-						UpdateGOCTransform(*object, *gocTransform);
 			}
 
+			RecalculateDependentTransforms();
 			NotifyUpdatedObject();
 		}
 

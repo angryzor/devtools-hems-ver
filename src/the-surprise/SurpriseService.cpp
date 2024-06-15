@@ -32,7 +32,13 @@ void* SurpriseService::GetRuntimeTypeInfo() {
 }
 
 bool SurpriseService::ProcessMessage(Message& message) {
-    return false;
+    switch (message.ID) {
+    case HEMS_MEMBER_FOUND:
+        isHEMSMemberFound[static_cast<MsgHEMSMemberFound&>(message).kodamaNo] = true;
+        return true;
+    default:
+        return false;
+    }
 }
 
 void SurpriseService::OnAddedToGame() {
@@ -45,31 +51,29 @@ void SurpriseService::OnRemovedFromGame() {
 void SurpriseService::GameObjectAddedCallback(GameManager* gameManager, GameObject* gameObject) {
     if (gameObject->objectClass == app::ObjKodama::GetClass()) {
         auto* worldData = gameObject->GetWorldDataByClass<heur::rfl::ObjKodamaSpawner>();
+
+        if (isHEMSMemberFound[worldData->no])
+            return;
+
         switch (mode) {
         case Mode::COLLECTED_RANDOM:
-            if (gameManager->IsWorldFlagSet(worldData->no, 64) && (mt() % 100) < randomThreshold)
-                AddHEMSMember(gameObject);
+            AddHEMSMember(gameObject, !gameManager->IsWorldFlagSet(worldData->no, 64) || (mt() % 100) >= randomThreshold);
             break;
         case Mode::COLLECTED:
-            if (gameManager->IsWorldFlagSet(worldData->no, 64))
-                AddHEMSMember(gameObject);
+            AddHEMSMember(gameObject, !gameManager->IsWorldFlagSet(worldData->no, 64));
             break;
         case Mode::ALL_RANDOM:
-            if ((mt() % 100) < randomThreshold)
-                AddHEMSMember(gameObject);
+            AddHEMSMember(gameObject, (mt() % 100) >= randomThreshold);
             break;
         case Mode::ALL:
         case Mode::DDAY:
-            AddHEMSMember(gameObject);
+            AddHEMSMember(gameObject, false);
             break;
         }
     }
 }
 
 void SurpriseService::GameObjectRemovedCallback(GameManager* gameManager, GameObject* gameObject) {
-    //if (gameObject->objectClass == app::ObjKodama::GetClass())
-    //    if (auto* hemsMember = hemsMembers.GetValueOrFallback(gameObject, nullptr))
-    //        hemsMember->Kill();
 }
 
 void SurpriseService::AddSignalListener(SpectacleSignalId signalId, const hh::fnd::Handle<hh::game::GameObject>& launcher) {
@@ -84,14 +88,13 @@ csl::ut::MoveArray<hh::fnd::Handle<hh::game::GameObject>>& SurpriseService::GetS
     return signalListeners[signalId.channel][signalId.id];
 }
 
-void SurpriseService::AddHEMSMember(GameObject* kodama)
+void SurpriseService::AddHEMSMember(GameObject* kodama, bool placeholder)
 {
     auto* hemsMember = ObjHEMSMember::GetClass()->Create<ObjHEMSMember>(GetAllocator());
     auto kodamaId = kodama->GetWorldDataByClass<heur::rfl::ObjKodamaSpawner>()->no;
     WorldPosition pos{};
-    hemsMember->Setup(kodama->GetWorldObjectStatus()->objectData->id);
-    pGameManager->AddGameObject(hemsMember, kodamaId < sizeof(modderMembers) / sizeof(const char*) ? modderMembers[kodamaId] : normalMembers[mt() % (sizeof(modderMembers) / sizeof(const char*))], false, &pos, kodama);
-    //hemsMembers.Insert(kodama, hemsMember);
+    hemsMember->Setup(kodama->GetWorldObjectStatus()->objectData->id, placeholder);
+    pGameManager->AddGameObject(hemsMember, placeholder ? kodama->name.c_str() : kodamaId < sizeof(modderMembers) / sizeof(const char*) ? modderMembers[kodamaId] : normalMembers[mt() % (sizeof(modderMembers) / sizeof(const char*))], placeholder, &pos, kodama);
 }
 
 //class membuf : public std::basic_streambuf<char> {

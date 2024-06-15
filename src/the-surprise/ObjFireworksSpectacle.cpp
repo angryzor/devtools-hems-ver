@@ -11,7 +11,7 @@ void ObjFireworksSpectacle::Update(UpdatingPhase phase, const SUpdateInfo& updat
         if (auto* surpriseService = gameManager->GetService<SurpriseService>()) {
             float playTime = soundDirector->GetBgmSoundHandle(0).GetPlayTime();
 
-            if (inFirstSection && playTime > 279.7350993377483443f) {
+            if (inFirstSection && playTime > 278.7350993377483443f) {
                 soundDirector->PlayBgm({ "bgm_lastboss", 2, 0.0f, 0.0f, 0.0f, 1.0f, 0, 0x10001, 0 });
                 inFirstSection = false;
             }
@@ -61,6 +61,12 @@ void ObjFireworksSpectacle::AddCallback(GameManager* gameManager) {
     //spectacleDesc = ResourceManager::GetInstance()->GetResource<ResReflectionT<FireworkSpectacleDesc>>("surprising_timings");
     midiFile.readSmf(".\\Mods\\devtools\\surprising_timings.mid");
     midiFile.joinTracks();
+
+    // Prefer hearing music over ObjKodamaFollower yapping.
+    if (auto* resMgr = hh::fnd::ResourceManager::GetInstance())
+    if (auto* islandParamResource = resMgr->GetResource<hh::fnd::ResReflectionT<heur::rfl::IslandParameter>>("island_param"))
+    if (auto* islandParam = islandParamResource->GetData())
+        islandParam->kodama.normal.follow.maxFollowNum = 0;
 
     auto* soundDirector = gameManager->GetService<app::snd::SoundDirector>();
     soundDirector->PlayBgm({ "bgm_lastboss", 0, 0.0f, 0.0f, 0.0f, 1.0f, 0, 0x10001, 0 });

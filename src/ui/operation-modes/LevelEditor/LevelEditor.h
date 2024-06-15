@@ -28,6 +28,8 @@ class LevelEditor : public OperationMode, public hh::game::GameManagerListener, 
 #endif
     static float debugBoxScale;
 
+    void RecalculateDependentTransforms(hh::game::ObjectData* objectData);
+
 public:
     LevelEditor(csl::fnd::IAllocator* allocator);
     virtual ~LevelEditor();
@@ -69,6 +71,8 @@ public:
     void CheckSelectionHotkeys();
 
     void RenderDebugComments();
+
+    void RecalculateDependentTransforms();
 
     void ClearClipboard();
     void HandleClipboard();

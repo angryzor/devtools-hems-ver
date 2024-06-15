@@ -19,15 +19,16 @@ public:
     static const hh::fnd::RflClass rflClass;
 };
 
-class ObjHEMSMember : public hh::game::GameObject {
-    hh::game::GOCActivator::RangeSpawningConfig activatorConfig{};
-    hh::game::ObjectId kodamaId;
+class ObjHEMSMember : public hh::game::GameObject, public app::game::GOCEventListener {
+    hh::game::ObjectId kodamaId{};
+    bool placeholder{};
+    bool found{};
 public:
     virtual bool ProcessMessage(hh::fnd::Message& message) override;
     virtual void AddCallback(hh::game::GameManager* gameManager) override;
     virtual void RemoveCallback(hh::game::GameManager* gameManager) override;
 
-    void Setup(hh::game::ObjectId kodamaId);
+    void Setup(hh::game::ObjectId kodamaId, bool placeholder);
     void LookAtHill();
 
     GAMEOBJECT_CLASS_DECLARATION(ObjHEMSMember)

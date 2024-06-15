@@ -1,5 +1,6 @@
 #include "ObjHEMSMember.h"
 #include <utilities/math/MathUtils.h>
+#include "SurpriseService.h"
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -19,6 +20,27 @@ bool ObjHEMSMember::ProcessMessage(Message& message)
         snprintf(msg.comment, sizeof(msg.comment), "%s", name.c_str());
         return true;
     }
+    case MessageID::TRIGGER_ENTER:
+        if (kodamaId == ObjectId{})
+            break;
+
+        if (auto* objectWorld = gameManager->GetService<ObjectWorld>()) {
+            auto& chunk = objectWorld->GetWorldChunks()[0];
+            if (auto* kodamaObjectData = chunk->GetWorldObjectStatusByObjectId(kodamaId).objectData) {
+                auto kodamaNo = static_cast<heur::rfl::ObjKodamaSpawner*>(kodamaObjectData->spawnerData)->no;
+
+                if (kodamaNo < 0 || kodamaNo >= 999)
+                    break;
+
+
+                MsgHEMSMemberFound msg{ kodamaNo };
+                gameManager->SendMessageImmToService(msg);
+            }
+        }
+
+        found = true;
+        Kill();
+        return true;
     default:
         return GameObject::ProcessMessage(message);
     }
@@ -26,41 +48,53 @@ bool ObjHEMSMember::ProcessMessage(Message& message)
 
 void ObjHEMSMember::AddCallback(hh::game::GameManager* gameManager)
 {
-    auto* worldData = GetWorldDataByClass<ObjHEMSMemberSpawner>();
-    float scale = worldData ? worldData->scale : 1.0f;
-    auto* model = CreateComponent<hh::gfx::GOCVisualModel>();
-    hh::gfx::GOCVisualModelDescription mdesc{};
+    if (!placeholder) {
+        auto* worldData = GetWorldDataByClass<ObjHEMSMemberSpawner>();
+        float scale = worldData ? worldData->scale : 1.0f;
 
-    //HFrame* frame = new (std::align_val_t(16), GetAllocator()) HFrame{ GetAllocator() };
-    //frame->SetLocalTranslation({ 0.0f, 0.0f, -0.1f });
-    //mdesc.frame = frame;
+        hh::gfx::GOCVisualModelDescription mdesc{};
+        mdesc.model = ResourceManager::GetInstance()->GetResource<hh::gfx::ResModel>("pou");
 
-    mdesc.model = ResourceManager::GetInstance()->GetResource<hh::gfx::ResModel>("pou");
-    model->Setup(mdesc);
-    model->SetLocalScale({ scale, scale, scale });
-    AddComponent(model);
+        auto* model = CreateComponent<hh::gfx::GOCVisualModel>();
+        model->Setup(mdesc);
+        model->SetLocalScale({ scale, scale, scale });
+        AddComponent(model);
 
-    LookAtHill();
+        LookAtHill();
+    }
 
-    if (auto* objectWorld = gameManager->GetService<ObjectWorld>()) {
-        auto& chunk = objectWorld->GetWorldChunks()[0];
+    if (kodamaId != ObjectId{}) {
+        if (auto* objectWorld = gameManager->GetService<ObjectWorld>()) {
+            auto& chunk = objectWorld->GetWorldChunks()[0];
 
-        if (auto* kodama = chunk->GetGameObjectByObjectId(kodamaId)) {
-            kodama->Shutdown();
-            kodama->Kill();
-        }
+            if (auto* kodama = chunk->GetGameObjectByObjectId(kodamaId)) {
+                kodama->Shutdown();
+                kodama->Kill();
+            }
 
-        if (auto* kodamaObjectData = chunk->GetWorldObjectStatusByObjectId(kodamaId).objectData)
-        if (auto* kodamaRangeSpawningData = kodamaObjectData->GetComponentDataByType("RangeSpawning")) {
-            auto* activator = CreateComponent<GOCActivator>();
-            activator->Setup({ *static_cast<GOCActivator::RangeSpawningConfig*>(kodamaRangeSpawningData->data), false });
-            AddComponent(activator);
+            if (auto* kodamaObjectData = chunk->GetWorldObjectStatusByObjectId(kodamaId).objectData)
+            if (auto* kodamaRangeSpawningData = kodamaObjectData->GetComponentDataByType("RangeSpawning")) {
+                auto* activator = CreateComponent<GOCActivator>();
+                activator->Setup({ *static_cast<GOCActivator::RangeSpawningConfig*>(kodamaRangeSpawningData->data), false });
+                AddComponent(activator);
+            }
+
+            auto* collectCollider = CreateComponent<hh::physics::GOCSphereCollider>();
+            hh::physics::GOCSphereCollider::SetupInfo colliderSetupInfo{};
+            colliderSetupInfo.radius = 1.5f;
+            colliderSetupInfo.unk3 |= 1;
+            colliderSetupInfo.filterCategory = 25;
+            colliderSetupInfo.unk4 = 0x8000;
+            colliderSetupInfo.SetPosition({ 0.0f, 0.25f, 0.0f });
+            collectCollider->Setup(colliderSetupInfo);
+            AddComponent(collectCollider);
         }
     }
 }
 
 void ObjHEMSMember::RemoveCallback(hh::game::GameManager* gameManager)
 {
+    if (kodamaId != ObjectId{} && !found)
     if (auto* objectWorld = gameManager->GetService<ObjectWorld>()) {
         auto& chunk = objectWorld->GetWorldChunks()[0];
 
@@ -68,9 +102,13 @@ void ObjHEMSMember::RemoveCallback(hh::game::GameManager* gameManager)
     }
 }
 
-void ObjHEMSMember::Setup(ObjectId kodamaId)
+void ObjHEMSMember::Setup(ObjectId kodamaId, bool placeholder)
 {
     this->kodamaId = kodamaId;
+    this->placeholder = placeholder;
+
+    if (placeholder)
+        SetLayer(4);
 }
 
 void ObjHEMSMember::LookAtHill()

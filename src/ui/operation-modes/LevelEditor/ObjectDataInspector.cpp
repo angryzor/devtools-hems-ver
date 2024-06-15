@@ -28,13 +28,13 @@ void ObjectDataInspector::Render() {
 			ImGui::PushID("Align / Distribute");
 			Editor("##AlignX", alignX);
 			ImGui::SameLine();
-			Editor("Spacing", distributeSpacing.x());
+			Editor("SpacingX", distributeSpacing.x());
 			Editor("##AlignY", alignY);
 			ImGui::SameLine();
-			Editor("Spacing", distributeSpacing.y());
+			Editor("SpacingY", distributeSpacing.y());
 			Editor("##AlignZ", alignZ);
 			ImGui::SameLine();
-			Editor("Spacing", distributeSpacing.z());
+			Editor("SpacingZ", distributeSpacing.z());
 			if (ImGui::Button("Align / Distribute"))
 				Distribute();
 			ImGui::PopID();
@@ -44,6 +44,8 @@ void ObjectDataInspector::Render() {
 			bool edited = Editor("Focused object", *focusedObject);
 
 			if (edited || ImGui::IsItemDeactivatedAfterEdit()) {
+				levelEditor.RecalculateDependentTransforms();
+
 				hh::dbg::MsgParamChangedInEditor msg{};
 
 				levelEditor.NotifyActiveObject(msg);
@@ -81,10 +83,7 @@ void ObjectDataInspector::Distribute()
 	if (alignY) DistributeAlongBasis(Eigen::Vector3f::UnitY(), distributeSpacing.y());
 	if (alignZ) DistributeAlongBasis(Eigen::Vector3f::UnitZ(), distributeSpacing.z());
 
-	for (auto* object : levelEditor.focusedObjects)
-		if (auto* obj = levelEditor.focusedChunk->GetGameObjectByObjectId(object->id))
-			if (auto* gocTransform = obj->GetComponent<GOCTransform>())
-				UpdateGOCTransform(*object, *gocTransform);
+	levelEditor.RecalculateDependentTransforms();
 }
 
 void ObjectDataInspector::DistributeAlongBasis(const Eigen::Vector3f& basis, float spacing)
