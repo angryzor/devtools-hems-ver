@@ -28,7 +28,7 @@ set(UPDATE_SERVER_NAMESPACE_rangers "sonic-frontiers")
 set(FRIENDLY_GAME_NAME_rangers "Sonic Frontiers")
 
 # The main target
-foreach(DEVTOOLS_TARGET_SDK rangers wars)
+foreach(DEVTOOLS_TARGET_SDK rangers)# wars)
     set(PROJECT_DESCRIPTION "${FRIENDLY_GAME_NAME_${DEVTOOLS_TARGET_SDK}} DevTools")
     set(PROJECT_LONG_DESCRIPTION "In-engine development kit for ${FRIENDLY_GAME_NAME_${DEVTOOLS_TARGET_SDK}}")
     set(GAME_FOLDER_${DEVTOOLS_TARGET_SDK} ${GAME_FOLDER_DEFAULT_${DEVTOOLS_TARGET_SDK}} CACHE STRING "The location of your ${DEVTOOLS_TARGET_SDK} game folder.")
@@ -72,7 +72,7 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
             VS_DEBUGGER_WORKING_DIRECTORY ${DEBUGGER_WORKING_DIRECTORY}
     )
 
-    foreach(LIB ${DEVTOOLS_TARGET_SDK}-sdk HedgeLib filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imguizmo implot)
+    foreach(LIB ${DEVTOOLS_TARGET_SDK}-sdk HedgeLib filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imguizmo implot midifile)
         target_link_libraries(${DEVTOOLS_TARGET} PRIVATE ${LIB})
     endforeach()
 

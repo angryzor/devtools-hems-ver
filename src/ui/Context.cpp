@@ -6,6 +6,7 @@
 #include "SettingsManager.h"
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
 #include <hot-reload/ReloadManager.h>
+#include <the-surprise/ResMidiFile.h>
 
 static ID3D11Device* device;
 static ID3D11DeviceContext* deviceContext;
@@ -35,6 +36,13 @@ constexpr size_t displaySwapDeviceConstructorAddr = 0x155D23F80;
 HOOK(uint64_t, __fastcall, GameApplication_Reset, appResetAddr, hh::game::GameApplication* self) {
 	auto res = originalGameApplication_Reset(self);
 	Context::init();
+	return res;
+}
+
+HOOK(hh::fnd::ResourceTypeRegistry*, __fastcall, ResourceTypeRegistry_Create, 0x152EFD7F0) {
+	auto* res = originalResourceTypeRegistry_Create();
+	res->RegisterTypeInfo(ResMidiFile::GetTypeInfo());
+	res->RegisterExtension("mid", ResMidiFile::GetTypeInfo());
 	return res;
 }
 
@@ -126,6 +134,7 @@ HOOK(void*, __fastcall, SwapChainHook, displaySwapDeviceConstructorAddr, void* i
 void Context::install_hooks()
 {
 	INSTALL_HOOK(GameApplication_Reset);
+	INSTALL_HOOK(ResourceTypeRegistry_Create);
 	INSTALL_HOOK(WndProcHook);
 	INSTALL_HOOK(SwapChainHook);
 	InstallInputHooks();

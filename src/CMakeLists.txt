@@ -184,4 +184,29 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/operation-modes/ObjectInspection/component-inspectors/GOCVisual.h
             ui/operation-modes/ObjectInspection/component-inspectors/GOCActivator.h
     )
+
+    target_sources(${DEVTOOLS_TARGET}
+        PRIVATE
+            the-surprise/ResMidiFile.cpp
+            the-surprise/ObjFireworksSpectacle.cpp
+            the-surprise/ObjHEMSMember.cpp
+            the-surprise/SpectacleSignalId.cpp
+            the-surprise/spectacle-responders/ObjSpectacleEffectEmitter.cpp
+            the-surprise/spectacle-responders/ObjSpectacleObjectStatusController.cpp
+            the-surprise/spectacle-responders/ObjSpectacleLaserProjector.cpp
+            the-surprise/SurpriseService.cpp
+            the-surprise/TheSurprise.cpp
+        PRIVATE FILE_SET HEADERS FILES
+            the-surprise/MidiMessages.h
+            the-surprise/ResMidiFile.h
+            the-surprise/Members.h
+            the-surprise/ObjFireworksSpectacle.h
+            the-surprise/ObjHEMSMember.h
+            the-surprise/SpectacleSignalId.h
+            the-surprise/spectacle-responders/ObjSpectacleEffectEmitter.h
+            the-surprise/spectacle-responders/ObjSpectacleObjectStatusController.h
+            the-surprise/spectacle-responders/ObjSpectacleLaserProjector.h
+            the-surprise/SurpriseService.h
+            the-surprise/TheSurprise.h
+    )
 endif()

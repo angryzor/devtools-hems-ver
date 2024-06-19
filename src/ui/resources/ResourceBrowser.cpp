@@ -9,6 +9,7 @@
 #include <utilities/ResourceTypes.h>
 #include <reflection/serialization/ReflectionSerializer.h>
 #include <reflection/serialization/resource-rfls/ResourceRfls.h>
+#include <the-surprise/ResMidiFile.h>
 
 using namespace hh::fnd;
 
@@ -41,6 +42,7 @@ AssetIconId ResourceTypeToAssetIconId(const ResourceTypeInfo* typeInfo) {
 	if (typeInfo == heur::resources::ResAnimation::GetTypeInfo()) return AssetIconId::ANIMATION;
 	if (typeInfo == heur::resources::ResSkeleton::GetTypeInfo()) return AssetIconId::SKELETON;
 	if (typeInfo == heur::resources::ResDvScene::GetTypeInfo()) return AssetIconId::DVSCENE;
+	if (typeInfo == ResMidiFile::GetTypeInfo()) return AssetIconId::ATOM_PLAYLIST;
 #endif
 	return AssetIconId::MODEL;
 }
@@ -123,6 +125,8 @@ void ResourceBrowser::RenderContainerContents(const ResourceContainer* container
 
 	for (int i = 0; i < resourceCount; i++) {
 		ManagedResource* resource = container->GetResourceByIndex(i);
+		if (!strcmp(resource->GetName(), "devtools_extra"))
+			continue;
 		ImGui::PushID(resource);
 		RenderResource(resource);
 		if (ImGui::BeginPopupContextItem("Resource Context Menu")) {

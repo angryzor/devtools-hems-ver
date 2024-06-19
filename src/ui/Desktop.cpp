@@ -13,6 +13,10 @@
 #include <utilities/CompatibleObject.h>
 #include "common/editors/Basic.h"
 #include "common/inputs/Basic.h"
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+#include <the-surprise/TheSurprise.h>
+#include <the-surprise/ObjFireworksSpectacle.h>
+#endif
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -25,6 +29,8 @@ Desktop::Desktop(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator 
 {
 	resourceLoader = hh::fnd::ResourceLoader::Create(allocator);
 	resourceLoader->LoadPackfile("mods/angryzor_devtools/devtools.pac", 0);
+
+	InitTheSurprise(*resourceLoader);
 
 	Translations::Init(allocator);
 
@@ -79,6 +85,23 @@ void Desktop::Render() {
 	//	ImGui::Text("%d", *reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
 	//	ImGui::Checkbox("grind", reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
 	//}
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+	//static ObjFireworksSpectacle* spectacle{};
+
+	//if (auto* gameManager = GameManager::GetInstance()) {
+	//	if (spectacle) {
+	//		if (ImGui::Button("End fireworks spectacle")) {
+	//			spectacle->Kill();
+	//			spectacle = nullptr;
+	//		}
+	//	} else {
+	//		if (ImGui::Button("Start fireworks spectacle")) {
+	//			spectacle = static_cast<ObjFireworksSpectacle*>(ObjFireworksSpectacle::GetClass()->instantiator(hh::fnd::MemoryRouter::GetModuleAllocator()));
+	//			gameManager->AddGameObject(spectacle, "Fireworks spectacle", false, nullptr, nullptr);
+	//		}
+	//	}
+	//}
+#endif
 	//static char packfileName[300];
 	//ImGui::InputText("Packfile", packfileName, sizeof(packfileName));
 	//if (ImGui::Button("Put packfile in objectworld lol"))

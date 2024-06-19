@@ -25,3 +25,6 @@
 [submodule "sdks/wars-sdk"]
 	path = sdks/wars-sdk
 	url = https://github.com/angryzor/wars-sdk.git
+[submodule "vendor/midifile/midifile"]
+	path = vendor/midifile/midifile
+	url = https://github.com/craigsapp/midifile.git
