@@ -66,9 +66,11 @@ void ObjHEMSMember::AddCallback(hh::game::GameManager* gameManager)
         if (auto* objectWorld = gameManager->GetService<ObjectWorld>()) {
             auto& chunk = objectWorld->GetWorldChunks()[0];
 
-            if (auto* kodama = chunk->GetGameObjectByObjectId(kodamaId)) {
-                kodama->Shutdown();
-                kodama->Kill();
+            if (!placeholder) {
+                if (auto* kodama = chunk->GetGameObjectByObjectId(kodamaId)) {
+                    kodama->Shutdown();
+                    kodama->Kill();
+                }
             }
 
             if (auto* kodamaObjectData = chunk->GetWorldObjectStatusByObjectId(kodamaId).objectData)

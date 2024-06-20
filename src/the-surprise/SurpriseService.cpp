@@ -22,6 +22,9 @@ SurpriseService::SurpriseService(csl::fnd::IAllocator* allocator) : GameService{
         new (&controlListeners[j]) csl::ut::MoveArray<hh::fnd::Handle<hh::game::GameObject>>(GetAllocator());
     }
     for (size_t i = 0; i < sizeof(modderMembers) / sizeof(const char*); i++) {
+        assert(i < sizeof(kodamaNos) / sizeof(int));
+        assert(i < sizeof(modderMembers) / sizeof(const char*));
+        assert(kodamaNos[i] < sizeof(modderMembersByKodamaNo) / sizeof(const char*));
         modderMembersByKodamaNo[kodamaNos[i]] = modderMembers[i];
     }
 }
@@ -85,7 +88,7 @@ bool SurpriseService::ProcessMessage(Message& message) {
 
 void SurpriseService::OnAddedToGame() {
     resourceLoader = new (GetAllocator()) ResourceLoader{ GetAllocator() };
-    randomThreshold = 20;
+    randomThreshold = 70;
 
     auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     auto* tm = std::localtime(&now);
