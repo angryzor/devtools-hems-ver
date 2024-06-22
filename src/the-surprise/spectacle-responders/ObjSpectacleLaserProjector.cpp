@@ -201,9 +201,9 @@ GameObject* ObjSpectacleLaserProjector::Create(csl::fnd::IAllocator* allocator) 
     return new (allocator) ObjSpectacleLaserProjector{ allocator };
 }
 
-const hh::fnd::RflClassMember::Value ObjSpectacleLaserProjector::attributes[2]{
+const hh::fnd::RflClassMember::Value ObjSpectacleLaserProjector::attributes[1]{
     { "category", hh::fnd::RflClassMember::Type::TYPE_CSTRING, "Tutorial/HEMS" },
-    { "spawntype", hh::fnd::RflClassMember::Type::TYPE_CSTRING, "ETERNAL" },
+    //{ "spawntype", hh::fnd::RflClassMember::Type::TYPE_CSTRING, "ETERNAL" },
 };
 
 const GameObjectClass ObjSpectacleLaserProjector::gameObjectClass{

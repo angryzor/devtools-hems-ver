@@ -116,9 +116,9 @@ GameObject* ObjSpectacleObjectStatusController::Create(csl::fnd::IAllocator* all
 }
 
 //const char* ObjSpectacleObjectStatusController::category = "HEMS";
-const hh::fnd::RflClassMember::Value ObjSpectacleObjectStatusController::attributes[2]{
+const hh::fnd::RflClassMember::Value ObjSpectacleObjectStatusController::attributes[1]{
     { "category", hh::fnd::RflClassMember::Type::TYPE_CSTRING, "HEMS" },
-    { "spawntype", hh::fnd::RflClassMember::Type::TYPE_CSTRING, "ETERNAL" },
+    //{ "spawntype", hh::fnd::RflClassMember::Type::TYPE_CSTRING, "ETERNAL" },
 };
 
 const GameObjectClass ObjSpectacleObjectStatusController::gameObjectClass{

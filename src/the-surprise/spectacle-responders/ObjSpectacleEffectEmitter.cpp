@@ -168,9 +168,9 @@ GameObject* ObjSpectacleEffectEmitter::Create(csl::fnd::IAllocator* allocator) {
     return new (allocator) ObjSpectacleEffectEmitter{ allocator };
 }
 
-const hh::fnd::RflClassMember::Value ObjSpectacleEffectEmitter::attributes[2]{
+const hh::fnd::RflClassMember::Value ObjSpectacleEffectEmitter::attributes[1]{
     { "category", hh::fnd::RflClassMember::Type::TYPE_CSTRING, "Tutorial/HEMS" },
-    { "spawntype", hh::fnd::RflClassMember::Type::TYPE_CSTRING, "ETERNAL" },
+    //{ "spawntype", hh::fnd::RflClassMember::Type::TYPE_CSTRING, "ETERNAL" },
 };
 
 const GameObjectClass ObjSpectacleEffectEmitter::gameObjectClass{

@@ -27,6 +27,6 @@ public:
     void StopTargets() const;
 
     static const char* category;
-    static const hh::fnd::RflClassMember::Value attributes[2];
+    static const hh::fnd::RflClassMember::Value attributes[1];
     GAMEOBJECT_CLASS_DECLARATION(ObjSpectacleObjectStatusController)
 };

@@ -86,21 +86,21 @@ void Desktop::Render() {
 	//	ImGui::Checkbox("grind", reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
 	//}
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-	//static ObjFireworksSpectacle* spectacle{};
+	static ObjFireworksSpectacle* spectacle{};
 
-	//if (auto* gameManager = GameManager::GetInstance()) {
-	//	if (spectacle) {
-	//		if (ImGui::Button("End fireworks spectacle")) {
-	//			spectacle->Kill();
-	//			spectacle = nullptr;
-	//		}
-	//	} else {
-	//		if (ImGui::Button("Start fireworks spectacle")) {
-	//			spectacle = static_cast<ObjFireworksSpectacle*>(ObjFireworksSpectacle::GetClass()->instantiator(hh::fnd::MemoryRouter::GetModuleAllocator()));
-	//			gameManager->AddGameObject(spectacle, "Fireworks spectacle", false, nullptr, nullptr);
-	//		}
-	//	}
-	//}
+	if (auto* gameManager = GameManager::GetInstance()) {
+		if (spectacle) {
+			if (ImGui::Button("End fireworks spectacle")) {
+				spectacle->Kill();
+				spectacle = nullptr;
+			}
+		} else {
+			if (ImGui::Button("Start fireworks spectacle")) {
+				spectacle = static_cast<ObjFireworksSpectacle*>(ObjFireworksSpectacle::GetClass()->instantiator(hh::fnd::MemoryRouter::GetModuleAllocator()));
+				gameManager->AddGameObject(spectacle, "Fireworks spectacle", false, nullptr, nullptr);
+			}
+		}
+	}
 #endif
 	//static char packfileName[300];
 	//ImGui::InputText("Packfile", packfileName, sizeof(packfileName));

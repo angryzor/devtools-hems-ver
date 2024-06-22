@@ -72,6 +72,16 @@ bool SurpriseService::ProcessMessage(Message& message) {
                 }
             }
             break;
+        case 1:
+            if (auto* overlayService = pGameManager->GetService<app::ui::UIOverlayService>()) {
+                auto* request = app::ui::RequestOverlayWindow::Create(GetAllocator());
+                request->header.copyFrom("devtools_birthday_header");
+                request->text.copyFrom("devtools_birthday_main");
+                request->unk2 = 0;
+                request->unk101 = 1;
+                overlayService->QueueBeginRequest(request);
+            }
+            break;
         }
         return true;
     }
@@ -79,6 +89,20 @@ bool SurpriseService::ProcessMessage(Message& message) {
         auto& msg = static_cast<MsgHEMSMemberFound&>(message);
         assert(msg.kodamaNo >= 0 && msg.kodamaNo < sizeof(isHEMSMemberFound) / sizeof(bool));
         isHEMSMemberFound[msg.kodamaNo] = true;
+
+        if (auto* overlayService = pGameManager->GetService<app::ui::UIOverlayService>()) {
+            auto* request = app::ui::RequestOverlayCaption::Create(GetAllocator());
+            request->Setup("devtools_birthday_member_found", nullptr, 2.0f);
+            request->unk206 = 3;
+
+            if (auto* sender = static_cast<hh::game::GameObject*>(hh::game::GameObjectSystem::GetGameObjectByHandle(msg.Sender))) {
+                auto* memberName = request->textVariables.Add(&pAllocator);
+                memberName->SetUntranslatedValue("devtools_birthday_member_name", sender->name.c_str());
+            }
+
+            overlayService->QueueBeginRequest(request);
+        }
+
         return true;
     }
     default:
@@ -97,9 +121,9 @@ void SurpriseService::OnAddedToGame() {
         switch (tm->tm_mday) {
         case 19: mode = Mode::COLLECTED_RANDOM; break;
         case 20: mode = Mode::COLLECTED_RANDOM; break;
-        case 21: mode = Mode::COLLECTED; break;
-        case 22: mode = Mode::ALL_RANDOM; break;
-        case 23: mode = Mode::ALL; break;
+        case 21: mode = Mode::DDAY; break;
+        case 22: mode = Mode::DDAY; break;
+        case 23: mode = Mode::DDAY; break;
         }
     }
 

@@ -20,9 +20,12 @@ bool ObjHEMSMember::ProcessMessage(Message& message)
         snprintf(msg.comment, sizeof(msg.comment), "%s", name.c_str());
         return true;
     }
-    case MessageID::TRIGGER_ENTER:
+    case MessageID::TRIGGER_ENTER: {
         if (kodamaId == ObjectId{})
             return true;
+
+        auto* gocEffect = GetComponent<hh::eff::GOCEffect>();
+        gocEffect->CreateEffect("ef_ko_vanish01_gold", nullptr);
 
         if (auto* objectWorld = gameManager->GetService<ObjectWorld>()) {
             auto& chunk = objectWorld->GetWorldChunks()[0];
@@ -33,6 +36,7 @@ bool ObjHEMSMember::ProcessMessage(Message& message)
                     return true;
 
                 MsgHEMSMemberFound msg{ kodamaNo };
+                msg.Sender = this;
                 gameManager->SendMessageImmToService(msg);
             }
         }
@@ -40,6 +44,7 @@ bool ObjHEMSMember::ProcessMessage(Message& message)
         found = true;
         Kill();
         return true;
+    }
     default:
         return GameObject::ProcessMessage(message);
     }
@@ -91,6 +96,10 @@ void ObjHEMSMember::AddCallback(hh::game::GameManager* gameManager)
                 colliderSetupInfo.SetPosition({ 0.0f, 0.25f, 0.0f });
                 collectCollider->Setup(colliderSetupInfo);
                 AddComponent(collectCollider);
+
+                auto* gocEffect = CreateComponent<hh::eff::GOCEffect>();
+                gocEffect->Setup({ 0, 1, 1.0f, 0, -1, 0, 0 });
+                AddComponent(gocEffect);
             }
         }
     }
