@@ -141,7 +141,7 @@ GameObject* ObjHEMSMember::Create(csl::fnd::IAllocator* allocator) {
 }
 
 RflClassMember::Value hemsMemberAttrs[]{
-    { "category", RflClassMember::Type::TYPE_CSTRING, "Tutorial/HEMS" },
+    { "category", RflClassMember::Type::TYPE_CSTRING, "HEMS" },
 };
 
 const GameObjectClass ObjHEMSMember::gameObjectClass{

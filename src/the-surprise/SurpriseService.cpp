@@ -101,6 +101,13 @@ bool SurpriseService::ProcessMessage(Message& message) {
             }
 
             overlayService->QueueBeginRequest(request);
+
+            if (GetFoundMemberCount() >= 0) {
+                auto* request = app::ui::RequestOverlayCaption::Create(GetAllocator());
+                request->Setup("devtools_birthday_enough_members", nullptr, 2.0f);
+                request->unk206 = 3;
+                overlayService->QueueBeginRequest(request);
+            }
         }
 
         return true;
@@ -112,20 +119,6 @@ bool SurpriseService::ProcessMessage(Message& message) {
 
 void SurpriseService::OnAddedToGame() {
     resourceLoader = new (GetAllocator()) ResourceLoader{ GetAllocator() };
-    randomThreshold = 70;
-
-    auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    auto* tm = std::localtime(&now);
-
-    if (tm->tm_mon == 5 && tm->tm_mday >= 19 && tm->tm_mday <= 23) {
-        switch (tm->tm_mday) {
-        case 19: mode = Mode::COLLECTED_RANDOM; break;
-        case 20: mode = Mode::COLLECTED_RANDOM; break;
-        case 21: mode = Mode::DDAY; break;
-        case 22: mode = Mode::DDAY; break;
-        case 23: mode = Mode::DDAY; break;
-        }
-    }
 
     pGameManager->AddListener(this);
 }
@@ -196,9 +189,20 @@ csl::ut::MoveArray<hh::fnd::Handle<hh::game::GameObject>>& SurpriseService::GetC
     return controlListeners[controlId];
 }
 
+size_t SurpriseService::GetFoundMemberCount() const
+{
+    size_t res{};
+
+    for (size_t i = 0; i < sizeof(isHEMSMemberFound) / sizeof(bool); i++) {
+        res += isHEMSMemberFound[i] ? 1 : 0;
+    }
+
+    return res;
+}
+
 void SurpriseService::AddHEMSMember(GameObject* kodama, bool placeholder)
 {
-    auto* hemsMember = ObjHEMSMember::GetClass()->Create<ObjHEMSMember>(GetAllocator());
+    auto* hemsMember = GameObject::Create<ObjHEMSMember>(GetAllocator());
     auto kodamaNo = kodama->GetWorldDataByClass<heur::rfl::ObjKodamaSpawner>()->no;
     WorldPosition pos{};
     hemsMember->Setup(kodama->GetWorldObjectStatus()->objectData->id, placeholder);

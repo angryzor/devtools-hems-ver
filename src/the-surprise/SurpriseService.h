@@ -32,7 +32,7 @@ public:
     csl::ut::MoveArray<hh::fnd::Handle<hh::game::GameObject>> controlListeners[128];
     hh::fnd::Reference<hh::fnd::ResourceLoader> resourceLoader{};
     std::mt19937 mt;
-    Mode mode{ Mode::COLLECTED_RANDOM };
+    Mode mode{ Mode::DDAY };
     uint32_t randomThreshold{};
     const char* modderMembersByKodamaNo[500]{ nullptr };
     bool isHEMSMemberFound[1000]{ false };
@@ -51,6 +51,8 @@ public:
     void RemoveControlListener(short controlId, const hh::fnd::Handle<hh::game::GameObject>& launcher);
     csl::ut::MoveArray<hh::fnd::Handle<hh::game::GameObject>>& GetSignalListeners(SpectacleSignalId signalId);
     csl::ut::MoveArray<hh::fnd::Handle<hh::game::GameObject>>& GetControlListeners(short controlId);
+
+    size_t GetFoundMemberCount() const;
 
     GAMESERVICE_CLASS_DECLARATION(SurpriseService)
 };

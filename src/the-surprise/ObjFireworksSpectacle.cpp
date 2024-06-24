@@ -3,6 +3,7 @@
 
 using namespace hh::fnd;
 using namespace hh::game;
+using namespace hh::eff;
 
 void* ObjFireworksSpectacleSpawner::Construct(void* pInstance, csl::fnd::IAllocator* pAllocator) {
     auto* self = static_cast<ObjFireworksSpectacleSpawner*>(pInstance);
@@ -13,14 +14,17 @@ void* ObjFireworksSpectacleSpawner::Construct(void* pInstance, csl::fnd::IAlloca
 void ObjFireworksSpectacleSpawner::Finish(void* pInstance) {}
 void ObjFireworksSpectacleSpawner::Clean(void* pInstance) {}
 
-const RflClassMember ObjFireworksSpectacleSpawner::rflClassMembers[4] = {
-    { "dummy", &SpectacleSignalId::rflClass, nullptr, RflClassMember::Type::TYPE_SINT32, RflClassMember::Type::TYPE_VOID, 0, 0, offsetof(ObjFireworksSpectacleSpawner, dummy), nullptr},
+const RflClassMember ObjFireworksSpectacleSpawner::rflClassMembers[1] = {
+    { "dummy", nullptr, nullptr, RflClassMember::Type::TYPE_SINT32, RflClassMember::Type::TYPE_VOID, 0, 0, offsetof(ObjFireworksSpectacleSpawner, dummy), nullptr},
 };
 
 const RflTypeInfo ObjFireworksSpectacleSpawner::typeInfo = RflTypeInfo{ "ObjFireworksSpectacleSpawner", "ObjFireworksSpectacleSpawner", &ObjFireworksSpectacleSpawner::Construct, &ObjFireworksSpectacleSpawner::Finish, &ObjFireworksSpectacleSpawner::Clean, sizeof(ObjFireworksSpectacleSpawner) };
 const RflClass ObjFireworksSpectacleSpawner::rflClass = RflClass{ "ObjFireworksSpectacleSpawner", nullptr, sizeof(ObjFireworksSpectacleSpawner), nullptr, 0, ObjFireworksSpectacleSpawner::rflClassMembers, sizeof(ObjFireworksSpectacleSpawner::rflClassMembers) / sizeof(RflClassMember), nullptr };
 
 void ObjFireworksSpectacle::Update(UpdatingPhase phase, const SUpdateInfo& updateInfo) {
+    if (!started)
+        return;
+
     switch (phase) {
     case UpdatingPhase::PRE_ANIM:
         if (auto* soundDirector = gameManager->GetService<app::snd::SoundDirector>())
@@ -79,17 +83,63 @@ void ObjFireworksSpectacle::Update(UpdatingPhase phase, const SUpdateInfo& updat
     }
 }
 
+bool ObjFireworksSpectacle::ProcessMessage(Message& message)
+{
+    switch (message.ID) {
+    case MessageID::TRIGGER_ENTER: {
+        auto* surpServ = gameManager->GetService<SurpriseService>();
+        size_t numMembers{};
+
+        if (surpServ->GetFoundMemberCount() >= 0) {
+            GetComponent<hh::physics::GOCSphereCollider>()->SetEnabled(false);
+            auto* eff = GetComponent<hh::eff::GOCEffect>();
+            eff->StopEffectAll();
+            eff->CreateEffect("ef_ob_guidecircle_out01", nullptr);
+            StartSpectacle();
+        }
+        else {
+            if (auto* overlayService = gameManager->GetService<app::ui::UIOverlayService>()) {
+                auto* request = app::ui::RequestOverlayCaption::Create(GetAllocator());
+                request->Setup("devtools_birthday_not_enough_members", nullptr, 2.0f);
+                request->unk206 = 3;
+                overlayService->QueueBeginRequest(request);
+            }
+        }
+
+        return true;
+    }
+    default:
+        return false;
+    }
+}
+
 void ObjFireworksSpectacle::AddCallback(GameManager* gameManager) {
     midiResource = ResourceManager::GetInstance()->GetResource<ResMidiFile>("surprising_timings");
 
-    StartSpectacle();
+    auto* gocEffect = CreateComponent<GOCEffect>();
+    gocEffect->Setup({ 0, 1, 1.0f, 0, -1, 0, 0 });
+    AddComponent(gocEffect);
+
+    auto* startCollider = CreateComponent<hh::physics::GOCSphereCollider>();
+    hh::physics::GOCSphereCollider::SetupInfo colliderSetupInfo{};
+    colliderSetupInfo.radius = 1.0f;
+    colliderSetupInfo.unk3 |= 1;
+    colliderSetupInfo.filterCategory = 25;
+    colliderSetupInfo.unk4 = 0x8000;
+    colliderSetupInfo.SetPosition({ 0.0f, 0.0f, 0.0f });
+    startCollider->Setup(colliderSetupInfo);
+    AddComponent(startCollider);
+
+    gocEffect->CreateEffect("ef_ob_guidecircle_loop01", nullptr);
 }
 
 void ObjFireworksSpectacle::RemoveCallback(GameManager* gameManager) {
-    EndSpectacle();
+    if (started)
+        EndSpectacle();
 }
 
 void ObjFireworksSpectacle::StartSpectacle() {
+    started = true;
     inFirstSection = true;
 
     if (auto* resMgr = hh::fnd::ResourceManager::GetInstance()) {
@@ -127,14 +177,18 @@ GameObject* ObjFireworksSpectacle::Create(csl::fnd::IAllocator* allocator) {
     return new (allocator) ObjFireworksSpectacle{ allocator };
 }
 
+const RflClassMember::Value ObjFireworksSpectacle::attributes[]{
+    { "category", RflClassMember::Type::TYPE_CSTRING, "HEMS" },
+};
+
 const GameObjectClass ObjFireworksSpectacle::gameObjectClass{
-    "Firework",
-    "Firework",
+    "FireworksSpectacle",
+    "FireworksSpectacle",
     sizeof(ObjFireworksSpectacle),
     &ObjFireworksSpectacle::Create,
-    0,
-    nullptr,
-    nullptr,
+    1,
+    ObjFireworksSpectacle::attributes,
+    &ObjFireworksSpectacleSpawner::rflClass,
 };
 
 const GameObjectClass* ObjFireworksSpectacle::GetClass() {

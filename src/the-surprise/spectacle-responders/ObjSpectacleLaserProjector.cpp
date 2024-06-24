@@ -92,6 +92,7 @@ bool ObjSpectacleLaserProjector::ProcessMessage(Message& message) {
 
         for (auto& laserFrame : laserFrames) {
             EffectTransFrameCreateInfo eci{ worldData->effectName };
+            eci.unk1a = true;
             eci.transInfo.frame = laserFrame;
             eci.transInfo.scale = true;
             gocEffect->CreateEffectEx(eci, nullptr);
@@ -202,7 +203,7 @@ GameObject* ObjSpectacleLaserProjector::Create(csl::fnd::IAllocator* allocator) 
 }
 
 const hh::fnd::RflClassMember::Value ObjSpectacleLaserProjector::attributes[1]{
-    { "category", hh::fnd::RflClassMember::Type::TYPE_CSTRING, "Tutorial/HEMS" },
+    { "category", hh::fnd::RflClassMember::Type::TYPE_CSTRING, "HEMS" },
     //{ "spawntype", hh::fnd::RflClassMember::Type::TYPE_CSTRING, "ETERNAL" },
 };
 

@@ -16,6 +16,7 @@
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 #include <the-surprise/TheSurprise.h>
 #include <the-surprise/ObjFireworksSpectacle.h>
+#include <the-surprise/ObjModScreenshot.h>
 #endif
 
 using namespace hh::fnd;
@@ -99,6 +100,13 @@ void Desktop::Render() {
 				spectacle = static_cast<ObjFireworksSpectacle*>(ObjFireworksSpectacle::GetClass()->instantiator(hh::fnd::MemoryRouter::GetModuleAllocator()));
 				gameManager->AddGameObject(spectacle, "Fireworks spectacle", false, nullptr, nullptr);
 			}
+		}
+
+		if (Desktop::instance->locationPicked && ImGui::Button("Spawn screenshot")) {
+			auto* screenshot = hh::game::GameObject::Create<ObjModScreenshot>(hh::fnd::MemoryRouter::GetModuleAllocator());
+			WorldPosition pos{};
+			pos.m_Position = Desktop::instance->pickedLocation;
+			gameManager->AddGameObject(screenshot, "Test screenshot", false, &pos, nullptr);
 		}
 	}
 #endif

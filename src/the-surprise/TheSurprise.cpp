@@ -6,11 +6,10 @@
 #include <the-surprise/spectacle-responders/ObjSpectacleEffectEmitter.h>
 #include <the-surprise/spectacle-responders/ObjSpectacleObjectStatusController.h>
 #include <the-surprise/spectacle-responders/ObjSpectacleLaserProjector.h>
+#include <the-surprise/spectacle-responders/ObjModScreenshotSource.h>
 #include <the-surprise/SurpriseService.h>
 
 using namespace hh::fnd;
-
-const char* intro = "HEMS members have invaded the island!\n\nCollect at least 50 of them to unlock a reward!";
 
 void InitTheSurprise(ResourceLoader& resourceLoader)
 {
@@ -20,8 +19,12 @@ void InitTheSurprise(ResourceLoader& resourceLoader)
 	BuiltinTypeRegistry::GetClassNameRegistry()->Register(&ObjSpectacleObjectStatusControllerSpawner::rflClass);
 	BuiltinTypeRegistry::GetTypeInfoRegistry()->Register(&ObjSpectacleLaserProjectorSpawner::typeInfo);
 	BuiltinTypeRegistry::GetClassNameRegistry()->Register(&ObjSpectacleLaserProjectorSpawner::rflClass);
+	BuiltinTypeRegistry::GetTypeInfoRegistry()->Register(&ObjModScreenshotSourceSpawner::typeInfo);
+	BuiltinTypeRegistry::GetClassNameRegistry()->Register(&ObjModScreenshotSourceSpawner::rflClass);
 	BuiltinTypeRegistry::GetTypeInfoRegistry()->Register(&ObjHEMSMemberSpawner::typeInfo);
 	BuiltinTypeRegistry::GetClassNameRegistry()->Register(&ObjHEMSMemberSpawner::rflClass);
+	BuiltinTypeRegistry::GetTypeInfoRegistry()->Register(&ObjFireworksSpectacleSpawner::typeInfo);
+	BuiltinTypeRegistry::GetClassNameRegistry()->Register(&ObjFireworksSpectacleSpawner::rflClass);
 
 	const hh::game::GameObjectClass* goClass;
 	goClass = ObjSpectacleEffectEmitter::GetClass();
@@ -30,7 +33,11 @@ void InitTheSurprise(ResourceLoader& resourceLoader)
 	GameObjectSystem::GetInstance()->gameObjectRegistry->AddObject(&goClass);
 	goClass = ObjSpectacleLaserProjector::GetClass();
 	GameObjectSystem::GetInstance()->gameObjectRegistry->AddObject(&goClass);
+	goClass = ObjModScreenshotSource::GetClass();
+	GameObjectSystem::GetInstance()->gameObjectRegistry->AddObject(&goClass);
 	goClass = ObjHEMSMember::GetClass();
+	GameObjectSystem::GetInstance()->gameObjectRegistry->AddObject(&goClass);
+	goClass = ObjFireworksSpectacle::GetClass();
 	GameObjectSystem::GetInstance()->gameObjectRegistry->AddObject(&goClass);
 
 	ResourceLoader::Unk1 locale{};

@@ -190,10 +190,12 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             the-surprise/ResMidiFile.cpp
             the-surprise/ObjFireworksSpectacle.cpp
             the-surprise/ObjHEMSMember.cpp
+            the-surprise/ObjModScreenshot.cpp
             the-surprise/SpectacleSignalId.cpp
             the-surprise/spectacle-responders/ObjSpectacleEffectEmitter.cpp
             the-surprise/spectacle-responders/ObjSpectacleObjectStatusController.cpp
             the-surprise/spectacle-responders/ObjSpectacleLaserProjector.cpp
+            the-surprise/spectacle-responders/ObjModScreenshotSource.cpp
             the-surprise/SurpriseService.cpp
             the-surprise/TheSurprise.cpp
         PRIVATE FILE_SET HEADERS FILES
@@ -202,10 +204,12 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             the-surprise/Members.h
             the-surprise/ObjFireworksSpectacle.h
             the-surprise/ObjHEMSMember.h
+            the-surprise/ObjModScreenshot.h
             the-surprise/SpectacleSignalId.h
             the-surprise/spectacle-responders/ObjSpectacleEffectEmitter.h
             the-surprise/spectacle-responders/ObjSpectacleObjectStatusController.h
             the-surprise/spectacle-responders/ObjSpectacleLaserProjector.h
+            the-surprise/spectacle-responders/ObjModScreenshotSource.h
             the-surprise/SurpriseService.h
             the-surprise/TheSurprise.h
     )

@@ -20,6 +20,7 @@ void ResMaterialEditor::RenderContents()
 		auto& info = resource->resource->GetMaterialParameterInfos()[i];
 
 		ImGui::PushID(i);
+		ImGui::Text("PARAM IDX %d", i);
 		switch (info.type) {
 		case hh::needle::ParameterType::FLOAT:
 			RenderFloatParameterEditor(i, static_cast<ParameterFloatValue*>(data));
